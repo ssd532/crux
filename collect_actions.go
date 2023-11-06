@@ -18,21 +18,6 @@ func collectActions(actionSet ActionSet, ruleActions RuleActions) ActionSet {
 		}
 	}
 
-	// Union-set of workflow names
-	newActionSet.workflows = append(newActionSet.workflows, actionSet.workflows...)
-	for _, newWF := range ruleActions.workflows {
-		found := false
-		for _, wf := range newActionSet.workflows {
-			if newWF == wf {
-				found = true
-				break
-			}
-		}
-		if !found {
-			newActionSet.workflows = append(newActionSet.workflows, newWF)
-		}
-	}
-
 	// Perform "union-set" of properties, overwriting previous property values if needed
 	newActionSet.properties = append(newActionSet.properties, actionSet.properties...)
 	for _, newProperty := range ruleActions.properties {

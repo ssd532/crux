@@ -6,12 +6,14 @@ and to make it easier to understand, add to, and edit these tests
 package main
 
 const (
-	lastStep        = "laststep"
-	lastStepSucc    = "laststepsucc"
-	completionLabel = "completionlabel"
-	start           = "START"
-	endSuccess      = "END-SUCCESS"
-	endFailure      = "END-FAILURE"
+	step       = "step"
+	stepFailed = "stepfailed"
+	nextStep   = "nextstep"
+	start      = "START"
+	endFlow    = "ENDFLOW"
+
+	trueStr  = "true"
+	falseStr = "false"
 
 	uccCreationClass = "ucccreation"
 	complexWFClass   = "complexwf"
@@ -21,8 +23,8 @@ func testUCCCreation(tests *[]doMatchTest) {
 	ruleSchemas = append(ruleSchemas, RuleSchema{
 		uccCreationClass,
 		[]AttrSchema{
-			{lastStep, "str"},
-			{lastStepSucc, "bool"},
+			{step, "str"},
+			{stepFailed, "bool"},
 			{"mode", "enum"},
 		},
 	})
@@ -42,71 +44,71 @@ func testUCCCreation(tests *[]doMatchTest) {
 func setupUCCCreationRuleSet() {
 	rule1 := Rule{
 		[]RulePatternTerm{
-			{lastStep, "eq", start},
-			{lastStepSucc, "eq", true},
+			{step, "eq", start},
+			{stepFailed, "eq", false},
 		},
 		RuleActions{
 			tasks:      []string{"getcustdetails"},
-			properties: []Property{{completionLabel, "getcustdetails"}},
+			properties: []Property{{nextStep, "getcustdetails"}},
 		},
 	}
 	rule2 := Rule{
 		[]RulePatternTerm{
-			{lastStep, "eq", "getcustdetails"},
-			{lastStepSucc, "eq", true},
+			{step, "eq", "getcustdetails"},
+			{stepFailed, "eq", false},
 		},
 		RuleActions{
-			workflows:  []string{"aof", "kycvalid", "nomauth"},
-			properties: []Property{{completionLabel, "readyforauthlink"}},
+			tasks:      []string{"aof", "kycvalid", "nomauth"},
+			properties: []Property{{nextStep, "readyforauthlink"}},
 		},
 	}
 	rule3 := Rule{
 		[]RulePatternTerm{
-			{lastStep, "eq", "getcustdetails"},
-			{lastStepSucc, "eq", true},
+			{step, "eq", "getcustdetails"},
+			{stepFailed, "eq", false},
 			{"mode", "eq", "physical"},
 		},
 		RuleActions{
-			workflows:  []string{"bankaccvalid"},
-			properties: []Property{{completionLabel, "readyforauthlink"}},
+			tasks:      []string{"bankaccvalid"},
+			properties: []Property{{nextStep, "readyforauthlink"}},
 		},
 	}
 	rule4 := Rule{
 		[]RulePatternTerm{
-			{lastStep, "eq", "getcustdetails"},
-			{lastStepSucc, "eq", true},
+			{step, "eq", "getcustdetails"},
+			{stepFailed, "eq", false},
 			{"mode", "eq", "demat"},
 		},
 		RuleActions{
-			workflows:  []string{"dpandbankaccvalid"},
-			properties: []Property{{completionLabel, "readyforauthlink"}},
+			tasks:      []string{"dpandbankaccvalid"},
+			properties: []Property{{nextStep, "readyforauthlink"}},
 		},
 	}
 	rule5 := Rule{
 		[]RulePatternTerm{
-			{lastStep, "eq", "readyforauthlink"},
-			{lastStepSucc, "eq", true},
+			{step, "eq", "readyforauthlink"},
+			{stepFailed, "eq", false},
 		},
 		RuleActions{
 			tasks:      []string{"sendauthlinktoclient"},
-			properties: []Property{{completionLabel, "sendauthlinktoclient"}},
+			properties: []Property{{nextStep, "sendauthlinktoclient"}},
 		},
 	}
 	rule6 := Rule{
 		[]RulePatternTerm{
-			{lastStep, "eq", "sendauthlinktoclient"},
-			{lastStepSucc, "eq", true},
+			{step, "eq", "sendauthlinktoclient"},
+			{stepFailed, "eq", false},
 		},
 		RuleActions{
-			properties: []Property{{completionLabel, endSuccess}},
+			properties: []Property{{endFlow, trueStr}},
 		},
 	}
 	rule7 := Rule{
 		[]RulePatternTerm{
-			{lastStepSucc, "eq", false},
+			{stepFailed, "eq", true},
 		},
 		RuleActions{
-			properties: []Property{{completionLabel, endFailure}},
+			properties: []Property{{endFlow, trueStr}},
 		},
 	}
 	ruleSets["ucccreation"] = RuleSet{1, uccCreationClass, "ucccreation",
@@ -116,112 +118,112 @@ func setupUCCCreationRuleSet() {
 
 func testUCCStart(tests *[]doMatchTest) {
 	entity := Entity{uccCreationClass, []Attr{
-		{lastStep, start},
-		{lastStepSucc, "true"},
+		{step, start},
+		{stepFailed, falseStr},
 		{"mode", "demat"},
 	}}
 	want := ActionSet{
 		tasks:      []string{"getcustdetails"},
-		properties: []Property{{completionLabel, "getcustdetails"}},
+		properties: []Property{{nextStep, "getcustdetails"}},
 	}
 	*tests = append(*tests, doMatchTest{"ucc start", entity, ruleSets["ucccreation"], ActionSet{}, want})
 }
 
 func testUCCGetCustDetailsDemat(tests *[]doMatchTest) {
 	entity := Entity{uccCreationClass, []Attr{
-		{lastStep, "getcustdetails"},
-		{lastStepSucc, "true"},
+		{step, "getcustdetails"},
+		{stepFailed, falseStr},
 		{"mode", "demat"},
 	}}
 	want := ActionSet{
-		workflows:  []string{"aof", "kycvalid", "nomauth", "dpandbankaccvalid"},
-		properties: []Property{{completionLabel, "readyforauthlink"}},
+		tasks:      []string{"aof", "kycvalid", "nomauth", "dpandbankaccvalid"},
+		properties: []Property{{nextStep, "readyforauthlink"}},
 	}
 	*tests = append(*tests, doMatchTest{"ucc getcustdetails demat", entity, ruleSets["ucccreation"], ActionSet{}, want})
 }
 
 func testUCCGetCustDetailsDematFail(tests *[]doMatchTest) {
 	entity := Entity{uccCreationClass, []Attr{
-		{lastStep, "getcustdetails"},
-		{lastStepSucc, "false"},
+		{step, "getcustdetails"},
+		{stepFailed, trueStr},
 		{"mode", "demat"},
 	}}
 	want := ActionSet{
-		properties: []Property{{completionLabel, endFailure}},
+		properties: []Property{{endFlow, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{"ucc getcustdetails demat fail", entity, ruleSets["ucccreation"], ActionSet{}, want})
 }
 
 func testUCCGetCustDetailsPhysical(tests *[]doMatchTest) {
 	entity := Entity{uccCreationClass, []Attr{
-		{lastStep, "getcustdetails"},
-		{lastStepSucc, "true"},
+		{step, "getcustdetails"},
+		{stepFailed, falseStr},
 		{"mode", "physical"},
 	}}
 	want := ActionSet{
-		workflows:  []string{"aof", "kycvalid", "nomauth", "bankaccvalid"},
-		properties: []Property{{completionLabel, "readyforauthlink"}},
+		tasks:      []string{"aof", "kycvalid", "nomauth", "bankaccvalid"},
+		properties: []Property{{nextStep, "readyforauthlink"}},
 	}
 	*tests = append(*tests, doMatchTest{"ucc getcustdetails physical", entity, ruleSets["ucccreation"], ActionSet{}, want})
 }
 
 func testUCCGetCustDetailsPhysicalFail(tests *[]doMatchTest) {
 	entity := Entity{uccCreationClass, []Attr{
-		{lastStep, "getcustdetails"},
-		{lastStepSucc, "false"},
+		{step, "getcustdetails"},
+		{stepFailed, trueStr},
 		{"mode", "physical"},
 	}}
 	want := ActionSet{
-		properties: []Property{{completionLabel, endFailure}},
+		properties: []Property{{endFlow, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{"ucc getcustdetails physical fail", entity, ruleSets["ucccreation"], ActionSet{}, want})
 }
 
 func testUCCReadyForAuthLink(tests *[]doMatchTest) {
 	entity := Entity{uccCreationClass, []Attr{
-		{lastStep, "readyforauthlink"},
-		{lastStepSucc, "true"},
+		{step, "readyforauthlink"},
+		{stepFailed, falseStr},
 		{"mode", "demat"},
 	}}
 	want := ActionSet{
 		tasks:      []string{"sendauthlinktoclient"},
-		properties: []Property{{completionLabel, "sendauthlinktoclient"}},
+		properties: []Property{{nextStep, "sendauthlinktoclient"}},
 	}
 	*tests = append(*tests, doMatchTest{"ucc readyforauthlink", entity, ruleSets["ucccreation"], ActionSet{}, want})
 }
 
 func testUCCReadyForAuthLinkFail(tests *[]doMatchTest) {
 	entity := Entity{uccCreationClass, []Attr{
-		{lastStep, "readyforauthlink"},
-		{lastStepSucc, "false"},
+		{step, "readyforauthlink"},
+		{stepFailed, trueStr},
 		{"mode", "demat"},
 	}}
 	want := ActionSet{
-		properties: []Property{{completionLabel, endFailure}},
+		properties: []Property{{endFlow, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{"ucc readyforauthlink fail", entity, ruleSets["ucccreation"], ActionSet{}, want})
 }
 
 func testUCCEndSuccess(tests *[]doMatchTest) {
 	entity := Entity{uccCreationClass, []Attr{
-		{lastStep, "sendauthlinktoclient"},
-		{lastStepSucc, "true"},
+		{step, "sendauthlinktoclient"},
+		{stepFailed, falseStr},
 		{"mode", "demat"},
 	}}
 	want := ActionSet{
-		properties: []Property{{completionLabel, endSuccess}},
+		properties: []Property{{endFlow, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{"ucc end-success", entity, ruleSets["ucccreation"], ActionSet{}, want})
 }
 
 func testUCCEndFailure(tests *[]doMatchTest) {
 	entity := Entity{uccCreationClass, []Attr{
-		{lastStep, "sendauthlinktoclient"},
-		{lastStepSucc, "false"},
+		{step, "sendauthlinktoclient"},
+		{stepFailed, trueStr},
 		{"mode", "demat"},
 	}}
 	want := ActionSet{
-		properties: []Property{{completionLabel, endFailure}},
+		properties: []Property{{endFlow, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{"ucc end-failure", entity, ruleSets["ucccreation"], ActionSet{}, want})
 }
@@ -230,8 +232,8 @@ func testComplexWF(tests *[]doMatchTest) {
 	ruleSchemas = append(ruleSchemas, RuleSchema{
 		complexWFClass,
 		[]AttrSchema{
-			{lastStep, "str"},
-			{lastStepSucc, "bool"},
+			{step, "str"},
+			{stepFailed, "bool"},
 			{"type", "enum"},
 			{"loc", "enum"},
 		},
@@ -257,60 +259,60 @@ func testComplexWF(tests *[]doMatchTest) {
 func setupRuleSetMainForComplexWF() {
 	rule1 := Rule{
 		[]RulePatternTerm{
-			{lastStep, "eq", start},
-			{lastStepSucc, "eq", true},
+			{step, "eq", start},
+			{stepFailed, "eq", false},
 		},
 		RuleActions{
 			tasks:      []string{"s1.1"},
-			properties: []Property{{completionLabel, "s1.1"}},
+			properties: []Property{{nextStep, "s1.1"}},
 		},
 	}
 	rule2 := Rule{
 		[]RulePatternTerm{
-			{lastStep, "eq", "s1.1"},
-			{lastStepSucc, "eq", true},
+			{step, "eq", "s1.1"},
+			{stepFailed, "eq", false},
 			{"type", "eq", "saving"},
 		},
 		RuleActions{
 			thenCall:   "rs2",
 			elseCall:   "rs3",
-			properties: []Property{{completionLabel, "l1.2"}},
+			properties: []Property{{nextStep, "l1.2"}},
 		},
 	}
 	rule3 := Rule{
 		[]RulePatternTerm{
-			{lastStep, "eq", "s1.1"},
-			{lastStepSucc, "eq", true},
+			{step, "eq", "s1.1"},
+			{stepFailed, "eq", false},
 		},
 		RuleActions{
 			tasks:      []string{"s1.2"},
-			properties: []Property{{completionLabel, "l1.3"}},
+			properties: []Property{{nextStep, "l1.3"}},
 		},
 	}
 	rule4 := Rule{
 		[]RulePatternTerm{
-			{lastStep, "eq", "l1.3"},
-			{lastStepSucc, "eq", true},
+			{step, "eq", "l1.3"},
+			{stepFailed, "eq", false},
 		},
 		RuleActions{
-			properties: []Property{{completionLabel, endSuccess}},
+			properties: []Property{{endFlow, trueStr}},
 		},
 	}
 	rule5 := Rule{
 		[]RulePatternTerm{
-			{lastStep, "eq", "l3.2"},
-			{lastStepSucc, "eq", true},
+			{step, "eq", "l3.2"},
+			{stepFailed, "eq", false},
 		},
 		RuleActions{
-			properties: []Property{{completionLabel, endSuccess}},
+			properties: []Property{{endFlow, trueStr}},
 		},
 	}
 	rule6 := Rule{
 		[]RulePatternTerm{
-			{lastStepSucc, "eq", false},
+			{stepFailed, "eq", true},
 		},
 		RuleActions{
-			properties: []Property{{completionLabel, endFailure}},
+			properties: []Property{{endFlow, trueStr}},
 		},
 	}
 	ruleSets["main"] = RuleSet{
@@ -322,12 +324,12 @@ func setupRuleSetMainForComplexWF() {
 func setupRuleSet2ForComplexWF() {
 	rule1 := Rule{
 		[]RulePatternTerm{
-			{lastStep, "eq", "s1.1"},
-			{lastStepSucc, "eq", true},
+			{step, "eq", "s1.1"},
+			{stepFailed, "eq", false},
 		},
 		RuleActions{
 			tasks:      []string{"s2.1"},
-			properties: []Property{{completionLabel, "l2.1"}},
+			properties: []Property{{nextStep, "l2.1"}},
 		},
 	}
 	ruleSets["rs2"] = RuleSet{
@@ -339,36 +341,36 @@ func setupRuleSet2ForComplexWF() {
 func setupRuleSet3ForComplexWF() {
 	rule1 := Rule{
 		[]RulePatternTerm{
-			{lastStep, "eq", "s1.1"},
-			{lastStepSucc, "eq", true},
+			{step, "eq", "s1.1"},
+			{stepFailed, "eq", false},
 			{"loc", "eq", "urban"},
 		},
 		RuleActions{
 			tasks:      []string{"s3.1"},
-			properties: []Property{{completionLabel, "l3.1"}},
+			properties: []Property{{nextStep, "l3.1"}},
 			willReturn: true,
 		},
 	}
 	rule2 := Rule{
 		[]RulePatternTerm{
-			{lastStep, "eq", "s1.1"},
-			{lastStepSucc, "eq", true},
+			{step, "eq", "s1.1"},
+			{stepFailed, "eq", false},
 			{"loc", "eq", "rural"},
 		},
 		RuleActions{
 			tasks:      []string{"s3.2"},
-			properties: []Property{{completionLabel, "l3.2"}},
+			properties: []Property{{nextStep, "l3.2"}},
 			willExit:   true,
 		},
 	}
 	rule3 := Rule{
 		[]RulePatternTerm{
-			{lastStep, "eq", "s1.1"},
-			{lastStepSucc, "eq", true},
+			{step, "eq", "s1.1"},
+			{stepFailed, "eq", false},
 		},
 		RuleActions{
 			tasks:      []string{"s3.3"},
-			properties: []Property{{completionLabel, "l3.3"}},
+			properties: []Property{{nextStep, "l3.3"}},
 		},
 	}
 	ruleSets["rs3"] = RuleSet{
@@ -379,14 +381,14 @@ func setupRuleSet3ForComplexWF() {
 
 func testWFBasic(tests *[]doMatchTest) {
 	entity := Entity{complexWFClass, []Attr{
-		{lastStep, start},
-		{lastStepSucc, "true"},
+		{step, start},
+		{stepFailed, falseStr},
 		{"type", "saving"},
 		{"loc", "urban"},
 	}}
 	want := ActionSet{
 		tasks:      []string{"s1.1"},
-		properties: []Property{{completionLabel, "s1.1"}},
+		properties: []Property{{nextStep, "s1.1"}},
 	}
 	*tests = append(*tests, doMatchTest{
 		"wf basic",
@@ -399,14 +401,14 @@ func testWFBasic(tests *[]doMatchTest) {
 
 func testWFThen(tests *[]doMatchTest) {
 	entity := Entity{complexWFClass, []Attr{
-		{lastStep, "s1.1"},
-		{lastStepSucc, "true"},
+		{step, "s1.1"},
+		{stepFailed, falseStr},
 		{"type", "saving"},
 		{"loc", "urban"},
 	}}
 	want := ActionSet{
 		tasks:      []string{"s2.1", "s1.2"},
-		properties: []Property{{completionLabel, "l1.3"}},
+		properties: []Property{{nextStep, "l1.3"}},
 	}
 	*tests = append(*tests, doMatchTest{
 		"wf then",
@@ -419,13 +421,13 @@ func testWFThen(tests *[]doMatchTest) {
 
 func testWFFail1_1(tests *[]doMatchTest) {
 	entity := Entity{complexWFClass, []Attr{
-		{lastStep, "s1.1"},
-		{lastStepSucc, "false"},
+		{step, "s1.1"},
+		{stepFailed, trueStr},
 		{"type", "saving"},
 		{"loc", "urban"},
 	}}
 	want := ActionSet{
-		properties: []Property{{completionLabel, endFailure}},
+		properties: []Property{{endFlow, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{
 		"wf fail 1.1",
@@ -438,14 +440,14 @@ func testWFFail1_1(tests *[]doMatchTest) {
 
 func testWFElseChecking(tests *[]doMatchTest) {
 	entity := Entity{complexWFClass, []Attr{
-		{lastStep, "s1.1"},
-		{lastStepSucc, "true"},
+		{step, "s1.1"},
+		{stepFailed, falseStr},
 		{"type", "checking"},
 		{"loc", "semirural"},
 	}}
 	want := ActionSet{
 		tasks:      []string{"s3.3", "s1.2"},
-		properties: []Property{{completionLabel, "l1.3"}},
+		properties: []Property{{nextStep, "l1.3"}},
 	}
 	*tests = append(*tests, doMatchTest{
 		"wf else checking",
@@ -458,14 +460,14 @@ func testWFElseChecking(tests *[]doMatchTest) {
 
 func testWFElsePPF(tests *[]doMatchTest) {
 	entity := Entity{complexWFClass, []Attr{
-		{lastStep, "s1.1"},
-		{lastStepSucc, "true"},
+		{step, "s1.1"},
+		{stepFailed, falseStr},
 		{"type", "ppf"},
 		{"loc", "semirural"},
 	}}
 	want := ActionSet{
 		tasks:      []string{"s3.3", "s1.2"},
-		properties: []Property{{completionLabel, "l1.3"}},
+		properties: []Property{{nextStep, "l1.3"}},
 	}
 	*tests = append(*tests, doMatchTest{
 		"wf else ppf",
@@ -478,13 +480,13 @@ func testWFElsePPF(tests *[]doMatchTest) {
 
 func testWFFail1_3(tests *[]doMatchTest) {
 	entity := Entity{complexWFClass, []Attr{
-		{lastStep, "l1.3"},
-		{lastStepSucc, "false"},
+		{step, "l1.3"},
+		{stepFailed, trueStr},
 		{"type", "checking"},
 		{"loc", "semirural"},
 	}}
 	want := ActionSet{
-		properties: []Property{{completionLabel, endFailure}},
+		properties: []Property{{endFlow, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{
 		"wf fail 1.3",
@@ -497,14 +499,14 @@ func testWFFail1_3(tests *[]doMatchTest) {
 
 func testWFElseAndReturn(tests *[]doMatchTest) {
 	entity := Entity{complexWFClass, []Attr{
-		{lastStep, "s1.1"},
-		{lastStepSucc, "true"},
+		{step, "s1.1"},
+		{stepFailed, falseStr},
 		{"type", "checking"},
 		{"loc", "urban"},
 	}}
 	want := ActionSet{
 		tasks:      []string{"s3.1", "s1.2"},
-		properties: []Property{{completionLabel, "l1.3"}},
+		properties: []Property{{nextStep, "l1.3"}},
 	}
 	*tests = append(*tests, doMatchTest{
 		"wf else and return",
@@ -517,14 +519,14 @@ func testWFElseAndReturn(tests *[]doMatchTest) {
 
 func testWFElseAndExit(tests *[]doMatchTest) {
 	entity := Entity{complexWFClass, []Attr{
-		{lastStep, "s1.1"},
-		{lastStepSucc, "true"},
+		{step, "s1.1"},
+		{stepFailed, falseStr},
 		{"type", "checking"},
 		{"loc", "rural"},
 	}}
 	want := ActionSet{
 		tasks:      []string{"s3.2"},
-		properties: []Property{{completionLabel, "l3.2"}},
+		properties: []Property{{nextStep, "l3.2"}},
 	}
 	*tests = append(*tests, doMatchTest{
 		"wf else and exit",
@@ -537,13 +539,13 @@ func testWFElseAndExit(tests *[]doMatchTest) {
 
 func testWFFail3_2(tests *[]doMatchTest) {
 	entity := Entity{complexWFClass, []Attr{
-		{lastStep, "l3.2"},
-		{lastStepSucc, "false"},
+		{step, "l3.2"},
+		{stepFailed, trueStr},
 		{"type", "checking"},
 		{"loc", "rural"},
 	}}
 	want := ActionSet{
-		properties: []Property{{completionLabel, endFailure}},
+		properties: []Property{{endFlow, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{
 		"wf fail 3.2",
@@ -556,13 +558,13 @@ func testWFFail3_2(tests *[]doMatchTest) {
 
 func testWFSucc1_3(tests *[]doMatchTest) {
 	entity := Entity{complexWFClass, []Attr{
-		{lastStep, "l1.3"},
-		{lastStepSucc, "true"},
+		{step, "l1.3"},
+		{stepFailed, falseStr},
 		{"type", "saving"},
 		{"loc", "urban"},
 	}}
 	want := ActionSet{
-		properties: []Property{{completionLabel, endSuccess}},
+		properties: []Property{{endFlow, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{
 		"wf succ 1.3",
@@ -575,13 +577,13 @@ func testWFSucc1_3(tests *[]doMatchTest) {
 
 func testWFSucc3_2(tests *[]doMatchTest) {
 	entity := Entity{complexWFClass, []Attr{
-		{lastStep, "l3.2"},
-		{lastStepSucc, "true"},
+		{step, "l3.2"},
+		{stepFailed, falseStr},
 		{"type", "checking"},
 		{"loc", "rural"},
 	}}
 	want := ActionSet{
-		properties: []Property{{completionLabel, endSuccess}},
+		properties: []Property{{endFlow, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{
 		"wf succ 3.2",

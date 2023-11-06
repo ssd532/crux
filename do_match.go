@@ -21,7 +21,6 @@ type Attr struct {
 
 type ActionSet struct {
 	tasks      []string
-	workflows  []string
 	properties []Property
 }
 
@@ -52,7 +51,6 @@ type RulePatternTerm struct {
 
 type RuleActions struct {
 	tasks      []string
-	workflows  []string
 	properties []Property
 	thenCall   string
 	elseCall   string

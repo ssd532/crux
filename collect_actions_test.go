@@ -70,27 +70,3 @@ func TestCollectActionsWithEmptyActionSet(t *testing.T) {
 		t.Errorf("\n\ncollectActions() = %v, \n\nwant %v\n\n", res, want)
 	}
 }
-
-func TestCollectActionsWithWorkflows(t *testing.T) {
-	actionSet := ActionSet{
-		tasks:      []string{"aof"},
-		workflows:  []string{"bankaccvalid", "dpandbankaccvalid"},
-		properties: []Property{{completionLabel, "abcdefg"}},
-	}
-
-	ruleActions := RuleActions{
-		workflows:  []string{"kycvalid", "bankaccvalid"},
-		properties: []Property{{completionLabel, "readyforauthlink"}},
-	}
-
-	want := ActionSet{
-		tasks:      []string{"aof"},
-		workflows:  []string{"bankaccvalid", "dpandbankaccvalid", "kycvalid"},
-		properties: []Property{{completionLabel, "readyforauthlink"}},
-	}
-
-	res := collectActions(actionSet, ruleActions)
-	if !reflect.DeepEqual(want, res) {
-		t.Errorf("\n\ncollectActions() = %v, \n\nwant %v\n\n", res, want)
-	}
-}
