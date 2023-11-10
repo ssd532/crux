@@ -1,4 +1,6 @@
 /*
+This file contains WFE tests for doMatch()
+
 Some of the definitions of rulesets below deliberately use a lot of whitespace to keep the code consistent
 and to make it easier to understand, add to, and edit these tests
 */
@@ -16,6 +18,8 @@ const (
 	falseStr = "false"
 
 	uccCreationClass = "ucccreation"
+	prepareAOFClass  = "prepareaof"
+	validateAOFClass = "validateaof"
 	complexWFClass   = "complexwf"
 )
 
@@ -28,6 +32,7 @@ func testUCCCreation(tests *[]doMatchTest) {
 			{"mode", "enum"},
 		},
 	})
+
 	setupUCCCreationRuleSet()
 
 	testUCCStart(tests)
@@ -226,6 +231,318 @@ func testUCCEndFailure(tests *[]doMatchTest) {
 		properties: []Property{{endFlow, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{"ucc end-failure", entity, ruleSets["ucccreation"], ActionSet{}, want})
+}
+
+func testPrepareAOF(tests *[]doMatchTest) {
+	ruleSchemas = append(ruleSchemas, RuleSchema{
+		prepareAOFClass,
+		[]AttrSchema{
+			{step, "str"},
+			{stepFailed, "bool"},
+		},
+	})
+
+	setupRuleSetForPrepareAOF()
+
+	testDownloadAOF(tests)
+	testDownloadAOFFail(tests)
+	testPrintAOF(tests)
+	testSignAOF(tests)
+	testSignAOFFail(tests)
+	testReceiveSignedAOF(tests)
+	testUploadAOF(tests)
+	testPrepareAOFEnd(tests)
+}
+
+func testDownloadAOF(tests *[]doMatchTest) {
+	entity := Entity{prepareAOFClass, []Attr{
+		{step, start},
+		{stepFailed, falseStr},
+	}}
+	want := ActionSet{
+		tasks:      []string{"downloadform"},
+		properties: []Property{{nextStep, "downloadform"}},
+	}
+	*tests = append(*tests, doMatchTest{"download aof", entity, ruleSets["prepareaof"], ActionSet{}, want})
+}
+
+func testDownloadAOFFail(tests *[]doMatchTest) {
+	entity := Entity{prepareAOFClass, []Attr{
+		{step, "downloadform"},
+		{stepFailed, trueStr},
+	}}
+	want := ActionSet{
+		properties: []Property{{endFlow, trueStr}},
+	}
+	*tests = append(*tests, doMatchTest{"download aof fail", entity, ruleSets["prepareaof"], ActionSet{}, want})
+}
+
+func testPrintAOF(tests *[]doMatchTest) {
+	entity := Entity{prepareAOFClass, []Attr{
+		{step, "downloadform"},
+		{stepFailed, falseStr},
+	}}
+	want := ActionSet{
+		tasks:      []string{"printprefilledform"},
+		properties: []Property{{nextStep, "printprefilledform"}},
+	}
+	*tests = append(*tests, doMatchTest{"print prefilled aof", entity, ruleSets["prepareaof"], ActionSet{}, want})
+}
+
+func testSignAOF(tests *[]doMatchTest) {
+	entity := Entity{prepareAOFClass, []Attr{
+		{step, "printprefilledform"},
+		{stepFailed, falseStr},
+	}}
+	want := ActionSet{
+		tasks:      []string{"signform"},
+		properties: []Property{{nextStep, "signform"}},
+	}
+	*tests = append(*tests, doMatchTest{"sign aof", entity, ruleSets["prepareaof"], ActionSet{}, want})
+}
+
+func testSignAOFFail(tests *[]doMatchTest) {
+	entity := Entity{prepareAOFClass, []Attr{
+		{step, "signform"},
+		{stepFailed, trueStr},
+	}}
+	want := ActionSet{
+		properties: []Property{{endFlow, trueStr}},
+	}
+	*tests = append(*tests, doMatchTest{"sign aof fail", entity, ruleSets["prepareaof"], ActionSet{}, want})
+}
+
+func testReceiveSignedAOF(tests *[]doMatchTest) {
+	entity := Entity{prepareAOFClass, []Attr{
+		{step, "signform"},
+		{stepFailed, falseStr},
+	}}
+	want := ActionSet{
+		tasks:      []string{"receivesignedform"},
+		properties: []Property{{nextStep, "receivesignedform"}},
+	}
+	*tests = append(*tests, doMatchTest{"receive signed aof", entity, ruleSets["prepareaof"], ActionSet{}, want})
+}
+
+func testUploadAOF(tests *[]doMatchTest) {
+	entity := Entity{prepareAOFClass, []Attr{
+		{step, "receivesignedform"},
+		{stepFailed, falseStr},
+	}}
+	want := ActionSet{
+		tasks:      []string{"uploadsignedform"},
+		properties: []Property{{nextStep, "uploadsignedform"}},
+	}
+	*tests = append(*tests, doMatchTest{"upload signed aof", entity, ruleSets["prepareaof"], ActionSet{}, want})
+}
+
+func testPrepareAOFEnd(tests *[]doMatchTest) {
+	entity := Entity{prepareAOFClass, []Attr{
+		{step, "uploadsignedform"},
+		{stepFailed, falseStr},
+	}}
+	want := ActionSet{
+		properties: []Property{{endFlow, trueStr}},
+	}
+	*tests = append(*tests, doMatchTest{"prepare aof end", entity, ruleSets["prepareaof"], ActionSet{}, want})
+}
+
+func setupRuleSetForPrepareAOF() {
+	rule1 := Rule{
+		[]RulePatternTerm{
+			{step, "eq", start},
+			{stepFailed, "eq", false},
+		},
+		RuleActions{
+			tasks:      []string{"downloadform"},
+			properties: []Property{{nextStep, "downloadform"}},
+		},
+	}
+	rule2 := Rule{
+		[]RulePatternTerm{
+			{step, "eq", "downloadform"},
+			{stepFailed, "eq", false},
+		},
+		RuleActions{
+			tasks:      []string{"printprefilledform"},
+			properties: []Property{{nextStep, "printprefilledform"}},
+		},
+	}
+	rule3 := Rule{
+		[]RulePatternTerm{
+			{step, "eq", "printprefilledform"},
+			{stepFailed, "eq", false},
+		},
+		RuleActions{
+			tasks:      []string{"signform"},
+			properties: []Property{{nextStep, "signform"}},
+		},
+	}
+	rule4 := Rule{
+		[]RulePatternTerm{
+			{step, "eq", "signform"},
+			{stepFailed, "eq", false},
+		},
+		RuleActions{
+			tasks:      []string{"receivesignedform"},
+			properties: []Property{{nextStep, "receivesignedform"}},
+		},
+	}
+	rule5 := Rule{
+		[]RulePatternTerm{
+			{step, "eq", "receivesignedform"},
+			{stepFailed, "eq", false},
+		},
+		RuleActions{
+			tasks:      []string{"uploadsignedform"},
+			properties: []Property{{nextStep, "uploadsignedform"}},
+		},
+	}
+	rule6 := Rule{
+		[]RulePatternTerm{
+			{step, "eq", "uploadsignedform"},
+			{stepFailed, "eq", false},
+		},
+		RuleActions{
+			tasks:      []string{},
+			properties: []Property{{endFlow, trueStr}},
+		},
+	}
+	rule7 := Rule{
+		[]RulePatternTerm{
+			{stepFailed, "eq", true},
+		},
+		RuleActions{
+			properties: []Property{{endFlow, trueStr}},
+		},
+	}
+	ruleSets["prepareaof"] = RuleSet{1, prepareAOFClass, "prepareaof",
+		[]Rule{rule1, rule2, rule3, rule4, rule5, rule6, rule7},
+	}
+}
+
+func testValidateAOF(tests *[]doMatchTest) {
+	ruleSchemas = append(ruleSchemas, RuleSchema{
+		validateAOFClass,
+		[]AttrSchema{
+			{step, "str"},
+			{stepFailed, "bool"},
+			{"aofexists", "bool"},
+		},
+	})
+
+	setupRuleSetForValidateAOF()
+
+	testValidateExistingAOF(tests)
+	testValidateAOFStart(tests)
+	testAOFGetResponseFromRTA(tests)
+	testValidateAOFEnd(tests)
+}
+
+func testValidateExistingAOF(tests *[]doMatchTest) {
+	entity := Entity{validateAOFClass, []Attr{
+		{step, start},
+		{stepFailed, falseStr},
+		{"aofexists", trueStr},
+	}}
+	want := ActionSet{
+		properties: []Property{{endFlow, trueStr}},
+	}
+	*tests = append(*tests, doMatchTest{"validate existing aof", entity, ruleSets["validateaof"], ActionSet{}, want})
+}
+
+func testValidateAOFStart(tests *[]doMatchTest) {
+	entity := Entity{validateAOFClass, []Attr{
+		{step, start},
+		{stepFailed, falseStr},
+		{"aofexists", falseStr},
+	}}
+	want := ActionSet{
+		tasks:      []string{"sendaoftorta"},
+		properties: []Property{{nextStep, "sendaoftorta"}},
+	}
+	*tests = append(*tests, doMatchTest{"send aof to rta", entity, ruleSets["validateaof"], ActionSet{}, want})
+}
+
+func testAOFGetResponseFromRTA(tests *[]doMatchTest) {
+	entity := Entity{validateAOFClass, []Attr{
+		{step, "sendaoftorta"},
+		{stepFailed, falseStr},
+		{"aofexists", falseStr},
+	}}
+	want := ActionSet{
+		tasks:      []string{"getresponsefromrta"},
+		properties: []Property{{nextStep, "getresponsefromrta"}},
+	}
+	*tests = append(*tests, doMatchTest{"aof - get response from rta", entity, ruleSets["validateaof"], ActionSet{}, want})
+}
+
+func testValidateAOFEnd(tests *[]doMatchTest) {
+	entity := Entity{validateAOFClass, []Attr{
+		{step, "getresponsefromrta"},
+		{stepFailed, falseStr},
+		{"aofexists", falseStr},
+	}}
+	want := ActionSet{
+		properties: []Property{{endFlow, trueStr}},
+	}
+	*tests = append(*tests, doMatchTest{"validate aof end", entity, ruleSets["validateaof"], ActionSet{}, want})
+}
+
+func setupRuleSetForValidateAOF() {
+	rule1 := Rule{
+		[]RulePatternTerm{
+			{step, "eq", start},
+			{stepFailed, "eq", false},
+			{"aofexists", "eq", true},
+		},
+		RuleActions{
+			properties: []Property{{endFlow, trueStr}},
+		},
+	}
+	rule2 := Rule{
+		[]RulePatternTerm{
+			{step, "eq", start},
+			{stepFailed, "eq", false},
+			{"aofexists", "eq", false},
+		},
+		RuleActions{
+			tasks:      []string{"sendaoftorta"},
+			properties: []Property{{nextStep, "sendaoftorta"}},
+		},
+	}
+	rule3 := Rule{
+		[]RulePatternTerm{
+			{step, "eq", "sendaoftorta"},
+			{stepFailed, "eq", false},
+			{"aofexists", "eq", false},
+		},
+		RuleActions{
+			tasks:      []string{"getresponsefromrta"},
+			properties: []Property{{nextStep, "getresponsefromrta"}},
+		},
+	}
+	rule4 := Rule{
+		[]RulePatternTerm{
+			{step, "eq", "getresponsefromrta"},
+			{stepFailed, "eq", false},
+			{"aofexists", "eq", false},
+		},
+		RuleActions{
+			properties: []Property{{endFlow, trueStr}},
+		},
+	}
+	rule5 := Rule{
+		[]RulePatternTerm{
+			{stepFailed, "eq", true},
+		},
+		RuleActions{
+			properties: []Property{{endFlow, trueStr}},
+		},
+	}
+	ruleSets["validateaof"] = RuleSet{1, validateAOFClass, "validateaof",
+		[]Rule{rule1, rule2, rule3, rule4, rule5},
+	}
 }
 
 func testComplexWF(tests *[]doMatchTest) {

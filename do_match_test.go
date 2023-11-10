@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -20,14 +21,17 @@ func TestDoMatch(t *testing.T) {
 	testBasic(&tests)
 	testExit(&tests)
 	testReturn(&tests)
-	testsWithTransactions(&tests)
-	testsWithOrders(&tests)
+	testTransactions(&tests)
+	testPurchases(&tests)
+	testOrders(&tests)
 
 	// WFE tests
 	testUCCCreation(&tests)
+	testPrepareAOF(&tests)
+	testValidateAOF(&tests)
 	testComplexWF(&tests)
 
-	t.Logf("Running %v doMatch() tests\n", len(tests))
+	fmt.Printf("Running %v doMatch() tests\n", len(tests))
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, _, _ := doMatch(tt.entity, tt.ruleSet, tt.actionSet, map[string]bool{})
