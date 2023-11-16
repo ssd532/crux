@@ -17,7 +17,9 @@ type doMatchTest struct {
 func TestDoMatch(t *testing.T) {
 	tests := []doMatchTest{}
 
-	// BRE tests
+	/**************
+	   BRE tests
+	**************/
 	testBasic(&tests)
 	testExit(&tests)
 	testReturn(&tests)
@@ -25,10 +27,13 @@ func TestDoMatch(t *testing.T) {
 	testPurchases(&tests)
 	testOrders(&tests)
 
-	// WFE tests
+	/**************
+	   WFE tests
+	**************/
 	testUCCCreation(&tests)
 	testPrepareAOF(&tests)
 	testValidateAOF(&tests)
+	// An artificial workflow with random meaningless data, for testing purposes
 	testComplexWF(&tests)
 
 	fmt.Printf("Running %v doMatch() tests\n", len(tests))
@@ -36,7 +41,7 @@ func TestDoMatch(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got, _, _ := doMatch(tt.entity, tt.ruleSet, tt.actionSet, map[string]bool{})
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("\n\ndoMatch() = %v, \n\nwant %v\n\n", got, tt.want)
+				t.Errorf("\n\ndoMatch() = %v, \n\nwant        %v\n\n", got, tt.want)
 			}
 		})
 	}

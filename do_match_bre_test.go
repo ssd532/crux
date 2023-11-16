@@ -117,9 +117,19 @@ func testTransactions(tests *[]doMatchTest) {
 	setupRuleSetMemberDisc()
 	setupRuleSetNonMemberDisc()
 
-	testThenAndReturn(tests)
-	testElseAndThenAndExit(tests)
-	testElseAndElse(tests)
+	testWinterDiscJacket60(tests)
+	testWinterDiscJacket40(tests)
+	testWinterDiscKettle110Cash(tests)
+	testWinterDiscKettle110Card(tests)
+	testMemberDiscLamp60(tests)
+	testMemberDiscKettle60Card(tests)
+	testMemberDiscKettle60Cash(tests)
+	testMemberDiscKettle110Card(tests)
+	testMemberDiscKettle110Cash(tests)
+	testNonMemberDiscLamp30(tests)
+	testNonMemberDiscKettle70(tests)
+	testNonMemberDiscKettle110Cash(tests)
+	testNonMemberDiscKettle110Card(tests)
 }
 
 func setupRuleSetMainForTransaction() {
@@ -252,7 +262,7 @@ func setupRuleSetNonMemberDisc() {
 	}
 	rule2 := Rule{
 		[]RulePatternTerm{
-			{"price", "lt", 100},
+			{"price", "ge", 50},
 		},
 		RuleActions{
 			properties: []Property{{"discount", "10"}},
@@ -271,7 +281,7 @@ func setupRuleSetNonMemberDisc() {
 	}
 }
 
-func testThenAndReturn(tests *[]doMatchTest) {
+func testWinterDiscJacket60(tests *[]doMatchTest) {
 	entity := Entity{transactionClass,
 		[]Attr{
 			{"productname", "jacket"},
@@ -286,7 +296,7 @@ func testThenAndReturn(tests *[]doMatchTest) {
 		properties: []Property{{"discount", "50"}},
 	}
 	*tests = append(*tests, doMatchTest{
-		"then and return",
+		"winterdisc jacket 60",
 		entity,
 		ruleSets["main"],
 		ActionSet{},
@@ -294,7 +304,76 @@ func testThenAndReturn(tests *[]doMatchTest) {
 	})
 }
 
-func testElseAndThenAndExit(tests *[]doMatchTest) {
+func testWinterDiscJacket40(tests *[]doMatchTest) {
+	entity := Entity{transactionClass,
+		[]Attr{
+			{"productname", "jacket"},
+			{"price", "40"},
+			{"inwintersale", "true"},
+			{"paymenttype", "card"},
+			{"ismember", "true"},
+		},
+	}
+	want := ActionSet{
+		tasks:      []string{"freemug"},
+		properties: []Property{{"discount", "40"}, {"pointsmult", "2"}},
+	}
+	*tests = append(*tests, doMatchTest{
+		"winterdisc jacket 40",
+		entity,
+		ruleSets["main"],
+		ActionSet{},
+		want,
+	})
+}
+
+func testWinterDiscKettle110Cash(tests *[]doMatchTest) {
+	entity := Entity{transactionClass,
+		[]Attr{
+			{"productname", "kettle"},
+			{"price", "110"},
+			{"inwintersale", "true"},
+			{"paymenttype", "cash"},
+			{"ismember", "true"},
+		},
+	}
+	want := ActionSet{
+		tasks:      []string{"freepen"},
+		properties: []Property{{"discount", "45"}, {"pointsmult", "3"}},
+	}
+	*tests = append(*tests, doMatchTest{
+		"winterdisc kettle 110 cash",
+		entity,
+		ruleSets["main"],
+		ActionSet{},
+		want,
+	})
+}
+
+func testWinterDiscKettle110Card(tests *[]doMatchTest) {
+	entity := Entity{transactionClass,
+		[]Attr{
+			{"productname", "kettle"},
+			{"price", "110"},
+			{"inwintersale", "true"},
+			{"paymenttype", "card"},
+			{"ismember", "true"},
+		},
+	}
+	want := ActionSet{
+		tasks:      []string{"freemug"},
+		properties: []Property{{"discount", "45"}, {"pointsmult", "3"}},
+	}
+	*tests = append(*tests, doMatchTest{
+		"winterdisc kettle 110 card",
+		entity,
+		ruleSets["main"],
+		ActionSet{},
+		want,
+	})
+}
+
+func testMemberDiscLamp60(tests *[]doMatchTest) {
 	entity := Entity{transactionClass,
 		[]Attr{
 			{"productname", "lamp"},
@@ -308,7 +387,7 @@ func testElseAndThenAndExit(tests *[]doMatchTest) {
 		properties: []Property{{"discount", "35"}, {"pointsmult", "2"}},
 	}
 	*tests = append(*tests, doMatchTest{
-		"else and then and exit",
+		"memberdisc lamp 60",
 		entity,
 		ruleSets["main"],
 		ActionSet{},
@@ -316,10 +395,125 @@ func testElseAndThenAndExit(tests *[]doMatchTest) {
 	})
 }
 
-func testElseAndElse(tests *[]doMatchTest) {
+func testMemberDiscKettle60Card(tests *[]doMatchTest) {
 	entity := Entity{transactionClass,
 		[]Attr{
-			{"productname", "umbrella"},
+			{"productname", "kettle"},
+			{"price", "60"},
+			{"inwintersale", "false"},
+			{"paymenttype", "card"},
+			{"ismember", "true"},
+		},
+	}
+	want := ActionSet{
+		tasks:      []string{"freemug"},
+		properties: []Property{{"discount", "20"}},
+	}
+	*tests = append(*tests, doMatchTest{
+		"memberdisc kettle 60 card",
+		entity,
+		ruleSets["main"],
+		ActionSet{},
+		want,
+	})
+}
+
+func testMemberDiscKettle60Cash(tests *[]doMatchTest) {
+	entity := Entity{transactionClass,
+		[]Attr{
+			{"productname", "kettle"},
+			{"price", "60"},
+			{"inwintersale", "false"},
+			{"paymenttype", "cash"},
+			{"ismember", "true"},
+		},
+	}
+	want := ActionSet{
+		tasks:      []string{"freepen"},
+		properties: []Property{{"discount", "20"}},
+	}
+	*tests = append(*tests, doMatchTest{
+		"memberdisc kettle 60 cash",
+		entity,
+		ruleSets["main"],
+		ActionSet{},
+		want,
+	})
+}
+
+func testMemberDiscKettle110Card(tests *[]doMatchTest) {
+	entity := Entity{transactionClass,
+		[]Attr{
+			{"productname", "kettle"},
+			{"price", "110"},
+			{"inwintersale", "false"},
+			{"paymenttype", "card"},
+			{"ismember", "true"},
+		},
+	}
+	want := ActionSet{
+		tasks:      []string{"freemug"},
+		properties: []Property{{"discount", "25"}},
+	}
+	*tests = append(*tests, doMatchTest{
+		"memberdisc kettle 110 card",
+		entity,
+		ruleSets["main"],
+		ActionSet{},
+		want,
+	})
+}
+
+func testMemberDiscKettle110Cash(tests *[]doMatchTest) {
+	entity := Entity{transactionClass,
+		[]Attr{
+			{"productname", "kettle"},
+			{"price", "110"},
+			{"inwintersale", "false"},
+			{"paymenttype", "cash"},
+			{"ismember", "true"},
+		},
+	}
+	want := ActionSet{
+		tasks:      []string{"freepen"},
+		properties: []Property{{"discount", "25"}},
+	}
+	*tests = append(*tests, doMatchTest{
+		"memberdisc kettle 110 cash",
+		entity,
+		ruleSets["main"],
+		ActionSet{},
+		want,
+	})
+}
+
+func testNonMemberDiscLamp30(tests *[]doMatchTest) {
+	entity := Entity{transactionClass,
+		[]Attr{
+			{"productname", "lamp"},
+			{"price", "30"},
+			{"inwintersale", "false"},
+			{"paymenttype", "cash"},
+			{"ismember", "false"},
+		},
+	}
+	want := ActionSet{
+		tasks:      []string{"freepen"},
+		properties: []Property{{"discount", "5"}},
+	}
+	*tests = append(*tests, doMatchTest{
+		"nonmemberdisc lamp 30",
+		entity,
+		ruleSets["main"],
+		ActionSet{},
+		want,
+	})
+}
+
+func testNonMemberDiscKettle70(tests *[]doMatchTest) {
+	entity := Entity{transactionClass,
+		[]Attr{
+			{"productname", "kettle"},
 			{"price", "70"},
 			{"inwintersale", "false"},
 			{"paymenttype", "cash"},
@@ -331,7 +525,53 @@ func testElseAndElse(tests *[]doMatchTest) {
 		properties: []Property{{"discount", "10"}},
 	}
 	*tests = append(*tests, doMatchTest{
-		"else and else",
+		"nonmemberdisc kettle 70",
+		entity,
+		ruleSets["main"],
+		ActionSet{},
+		want,
+	})
+}
+
+func testNonMemberDiscKettle110Cash(tests *[]doMatchTest) {
+	entity := Entity{transactionClass,
+		[]Attr{
+			{"productname", "kettle"},
+			{"price", "110"},
+			{"inwintersale", "false"},
+			{"paymenttype", "cash"},
+			{"ismember", "false"},
+		},
+	}
+	want := ActionSet{
+		tasks:      []string{"freepen"},
+		properties: []Property{{"discount", "15"}},
+	}
+	*tests = append(*tests, doMatchTest{
+		"nonmemberdisc kettle 110 cash",
+		entity,
+		ruleSets["main"],
+		ActionSet{},
+		want,
+	})
+}
+
+func testNonMemberDiscKettle110Card(tests *[]doMatchTest) {
+	entity := Entity{transactionClass,
+		[]Attr{
+			{"productname", "kettle"},
+			{"price", "110"},
+			{"inwintersale", "false"},
+			{"paymenttype", "card"},
+			{"ismember", "false"},
+		},
+	}
+	want := ActionSet{
+		tasks:      []string{"freemug"},
+		properties: []Property{{"discount", "15"}},
+	}
+	*tests = append(*tests, doMatchTest{
+		"nonmemberdisc kettle 110 card",
 		entity,
 		ruleSets["main"],
 		ActionSet{},
@@ -351,7 +591,8 @@ func testPurchases(tests *[]doMatchTest) {
 	setupRuleSetForPurchases()
 
 	testJacket35(tests)
-	testJacket55(tests)
+	testJacket55ForMember(tests)
+	testJacket55ForNonMember(tests)
 	testJacket75ForMember(tests)
 	testJacket75ForNonMember(tests)
 
@@ -390,7 +631,28 @@ func testJacket35(tests *[]doMatchTest) {
 	})
 }
 
-func testJacket55(tests *[]doMatchTest) {
+func testJacket55ForMember(tests *[]doMatchTest) {
+	entity := Entity{purchaseClass,
+		[]Attr{
+			{"product", "jacket"},
+			{"price", "55"},
+			{"ismember", "true"},
+		},
+	}
+	want := ActionSet{
+		tasks:      []string{"freepen", "freebottle", "freepencil", "freenotebook"},
+		properties: []Property{{"discount", "10"}},
+	}
+	*tests = append(*tests, doMatchTest{
+		"jacket price 55 for member",
+		entity,
+		ruleSets["main"],
+		ActionSet{},
+		want,
+	})
+}
+
+func testJacket55ForNonMember(tests *[]doMatchTest) {
 	entity := Entity{purchaseClass,
 		[]Attr{
 			{"product", "jacket"},
@@ -403,7 +665,7 @@ func testJacket55(tests *[]doMatchTest) {
 		properties: []Property{{"discount", "10"}},
 	}
 	*tests = append(*tests, doMatchTest{
-		"jacket price 55",
+		"jacket price 55 for non-member",
 		entity,
 		ruleSets["main"],
 		ActionSet{},
@@ -642,7 +904,7 @@ func testOven55(tests *[]doMatchTest) {
 		[]Attr{
 			{"product", "oven"},
 			{"price", "55"},
-			{"ismember", "false"},
+			{"ismember", "true"},
 		},
 	}
 	want := ActionSet{
