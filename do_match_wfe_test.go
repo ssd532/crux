@@ -10,9 +10,9 @@ package main
 const (
 	step       = "step"
 	stepFailed = "stepfailed"
-	nextStep   = "nextstep"
 	start      = "START"
-	endFlow    = "ENDFLOW"
+	nextStep   = "nextstep"
+	done       = "done"
 
 	trueStr  = "true"
 	falseStr = "false"
@@ -105,7 +105,7 @@ func setupUCCCreationRuleSet() {
 			{stepFailed, "eq", false},
 		},
 		RuleActions{
-			properties: []Property{{endFlow, trueStr}},
+			properties: []Property{{done, trueStr}},
 		},
 	}
 	rule7 := Rule{
@@ -113,7 +113,7 @@ func setupUCCCreationRuleSet() {
 			{stepFailed, "eq", true},
 		},
 		RuleActions{
-			properties: []Property{{endFlow, trueStr}},
+			properties: []Property{{done, trueStr}},
 		},
 	}
 	ruleSets["ucccreation"] = RuleSet{1, uccCreationClass, "ucccreation",
@@ -154,7 +154,7 @@ func testUCCGetCustDetailsDematFail(tests *[]doMatchTest) {
 		{"mode", "demat"},
 	}}
 	want := ActionSet{
-		properties: []Property{{endFlow, trueStr}},
+		properties: []Property{{done, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{"ucc getcustdetails demat fail", entity, ruleSets["ucccreation"], ActionSet{}, want})
 }
@@ -179,7 +179,7 @@ func testUCCGetCustDetailsPhysicalFail(tests *[]doMatchTest) {
 		{"mode", "physical"},
 	}}
 	want := ActionSet{
-		properties: []Property{{endFlow, trueStr}},
+		properties: []Property{{done, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{"ucc getcustdetails physical fail", entity, ruleSets["ucccreation"], ActionSet{}, want})
 }
@@ -204,7 +204,7 @@ func testUCCReadyForAuthLinkFail(tests *[]doMatchTest) {
 		{"mode", "demat"},
 	}}
 	want := ActionSet{
-		properties: []Property{{endFlow, trueStr}},
+		properties: []Property{{done, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{"ucc readyforauthlink fail", entity, ruleSets["ucccreation"], ActionSet{}, want})
 }
@@ -216,7 +216,7 @@ func testUCCEndSuccess(tests *[]doMatchTest) {
 		{"mode", "demat"},
 	}}
 	want := ActionSet{
-		properties: []Property{{endFlow, trueStr}},
+		properties: []Property{{done, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{"ucc end-success", entity, ruleSets["ucccreation"], ActionSet{}, want})
 }
@@ -228,7 +228,7 @@ func testUCCEndFailure(tests *[]doMatchTest) {
 		{"mode", "demat"},
 	}}
 	want := ActionSet{
-		properties: []Property{{endFlow, trueStr}},
+		properties: []Property{{done, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{"ucc end-failure", entity, ruleSets["ucccreation"], ActionSet{}, want})
 }
@@ -272,7 +272,7 @@ func testDownloadAOFFail(tests *[]doMatchTest) {
 		{stepFailed, trueStr},
 	}}
 	want := ActionSet{
-		properties: []Property{{endFlow, trueStr}},
+		properties: []Property{{done, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{"download aof fail", entity, ruleSets["prepareaof"], ActionSet{}, want})
 }
@@ -307,7 +307,7 @@ func testSignAOFFail(tests *[]doMatchTest) {
 		{stepFailed, trueStr},
 	}}
 	want := ActionSet{
-		properties: []Property{{endFlow, trueStr}},
+		properties: []Property{{done, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{"sign aof fail", entity, ruleSets["prepareaof"], ActionSet{}, want})
 }
@@ -342,7 +342,7 @@ func testPrepareAOFEnd(tests *[]doMatchTest) {
 		{stepFailed, falseStr},
 	}}
 	want := ActionSet{
-		properties: []Property{{endFlow, trueStr}},
+		properties: []Property{{done, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{"prepare aof end", entity, ruleSets["prepareaof"], ActionSet{}, want})
 }
@@ -405,7 +405,7 @@ func setupRuleSetForPrepareAOF() {
 		},
 		RuleActions{
 			tasks:      []string{},
-			properties: []Property{{endFlow, trueStr}},
+			properties: []Property{{done, trueStr}},
 		},
 	}
 	rule7 := Rule{
@@ -413,7 +413,7 @@ func setupRuleSetForPrepareAOF() {
 			{stepFailed, "eq", true},
 		},
 		RuleActions{
-			properties: []Property{{endFlow, trueStr}},
+			properties: []Property{{done, trueStr}},
 		},
 	}
 	ruleSets["prepareaof"] = RuleSet{1, prepareAOFClass, "prepareaof",
@@ -446,7 +446,7 @@ func testValidateExistingAOF(tests *[]doMatchTest) {
 		{"aofexists", trueStr},
 	}}
 	want := ActionSet{
-		properties: []Property{{endFlow, trueStr}},
+		properties: []Property{{done, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{"validate existing aof", entity, ruleSets["validateaof"], ActionSet{}, want})
 }
@@ -484,7 +484,7 @@ func testValidateAOFEnd(tests *[]doMatchTest) {
 		{"aofexists", falseStr},
 	}}
 	want := ActionSet{
-		properties: []Property{{endFlow, trueStr}},
+		properties: []Property{{done, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{"validate aof end", entity, ruleSets["validateaof"], ActionSet{}, want})
 }
@@ -497,7 +497,7 @@ func setupRuleSetForValidateAOF() {
 			{"aofexists", "eq", true},
 		},
 		RuleActions{
-			properties: []Property{{endFlow, trueStr}},
+			properties: []Property{{done, trueStr}},
 		},
 	}
 	rule2 := Rule{
@@ -529,7 +529,7 @@ func setupRuleSetForValidateAOF() {
 			{"aofexists", "eq", false},
 		},
 		RuleActions{
-			properties: []Property{{endFlow, trueStr}},
+			properties: []Property{{done, trueStr}},
 		},
 	}
 	rule5 := Rule{
@@ -537,7 +537,7 @@ func setupRuleSetForValidateAOF() {
 			{stepFailed, "eq", true},
 		},
 		RuleActions{
-			properties: []Property{{endFlow, trueStr}},
+			properties: []Property{{done, trueStr}},
 		},
 	}
 	ruleSets["validateaof"] = RuleSet{1, validateAOFClass, "validateaof",
@@ -612,7 +612,7 @@ func setupRuleSetMainForComplexWF() {
 			{stepFailed, "eq", false},
 		},
 		RuleActions{
-			properties: []Property{{endFlow, trueStr}},
+			properties: []Property{{done, trueStr}},
 		},
 	}
 	rule5 := Rule{
@@ -621,7 +621,7 @@ func setupRuleSetMainForComplexWF() {
 			{stepFailed, "eq", false},
 		},
 		RuleActions{
-			properties: []Property{{endFlow, trueStr}},
+			properties: []Property{{done, trueStr}},
 		},
 	}
 	rule6 := Rule{
@@ -629,7 +629,7 @@ func setupRuleSetMainForComplexWF() {
 			{stepFailed, "eq", true},
 		},
 		RuleActions{
-			properties: []Property{{endFlow, trueStr}},
+			properties: []Property{{done, trueStr}},
 		},
 	}
 	ruleSets["main"] = RuleSet{
@@ -744,7 +744,7 @@ func testWFFail1_1(tests *[]doMatchTest) {
 		{"loc", "urban"},
 	}}
 	want := ActionSet{
-		properties: []Property{{endFlow, trueStr}},
+		properties: []Property{{done, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{
 		"wf fail 1.1",
@@ -803,7 +803,7 @@ func testWFFail1_3(tests *[]doMatchTest) {
 		{"loc", "semirural"},
 	}}
 	want := ActionSet{
-		properties: []Property{{endFlow, trueStr}},
+		properties: []Property{{done, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{
 		"wf fail 1.3",
@@ -862,7 +862,7 @@ func testWFFail3_2(tests *[]doMatchTest) {
 		{"loc", "rural"},
 	}}
 	want := ActionSet{
-		properties: []Property{{endFlow, trueStr}},
+		properties: []Property{{done, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{
 		"wf fail 3.2",
@@ -881,7 +881,7 @@ func testWFSucc1_3(tests *[]doMatchTest) {
 		{"loc", "urban"},
 	}}
 	want := ActionSet{
-		properties: []Property{{endFlow, trueStr}},
+		properties: []Property{{done, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{
 		"wf succ 1.3",
@@ -900,7 +900,7 @@ func testWFSucc3_2(tests *[]doMatchTest) {
 		{"loc", "rural"},
 	}}
 	want := ActionSet{
-		properties: []Property{{endFlow, trueStr}},
+		properties: []Property{{done, trueStr}},
 	}
 	*tests = append(*tests, doMatchTest{
 		"wf succ 3.2",
