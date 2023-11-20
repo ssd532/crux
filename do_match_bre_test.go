@@ -1047,7 +1047,10 @@ func testOrders(tests *[]doMatchTest) {
 
 	testSIPOrder(tests)
 	testSwitchDematOrder(tests)
+	testSwitchDematExtHours(tests)
+	testRedemptionDematExtHours(tests)
 	testPurchaseOvernightOrder(tests)
+	testSIPLiquidOrder(tests)
 	testSwitchPhysicalOrder(tests)
 }
 
@@ -1185,6 +1188,52 @@ func testSwitchDematOrder(tests *[]doMatchTest) {
 	})
 }
 
+func testSwitchDematExtHours(tests *[]doMatchTest) {
+	entity := Entity{orderClass,
+		[]Attr{
+			{"ordertype", "switch"},
+			{"mode", "demat"},
+			{"liquidscheme", "false"},
+			{"overnightscheme", "false"},
+			{"extendedhours", "true"},
+		},
+	}
+	want := ActionSet{
+		properties: []Property{{"amfiordercutoff", "1500"}, {"bseordercutoff", "1500"},
+			{"unitscutoff", "1730"}},
+	}
+	*tests = append(*tests, doMatchTest{
+		"switch demat ext-hours order",
+		entity,
+		ruleSets["main"],
+		ActionSet{},
+		want,
+	})
+}
+
+func testRedemptionDematExtHours(tests *[]doMatchTest) {
+	entity := Entity{orderClass,
+		[]Attr{
+			{"ordertype", "redemption"},
+			{"mode", "demat"},
+			{"liquidscheme", "false"},
+			{"overnightscheme", "false"},
+			{"extendedhours", "true"},
+		},
+	}
+	want := ActionSet{
+		properties: []Property{{"amfiordercutoff", "1500"}, {"bseordercutoff", "1500"},
+			{"unitscutoff", "1730"}},
+	}
+	*tests = append(*tests, doMatchTest{
+		"redemption demat ext-hours order",
+		entity,
+		ruleSets["main"],
+		ActionSet{},
+		want,
+	})
+}
+
 func testPurchaseOvernightOrder(tests *[]doMatchTest) {
 	entity := Entity{orderClass,
 		[]Attr{
@@ -1201,6 +1250,29 @@ func testPurchaseOvernightOrder(tests *[]doMatchTest) {
 	}
 	*tests = append(*tests, doMatchTest{
 		"purchase overnight order",
+		entity,
+		ruleSets["main"],
+		ActionSet{},
+		want,
+	})
+}
+
+func testSIPLiquidOrder(tests *[]doMatchTest) {
+	entity := Entity{orderClass,
+		[]Attr{
+			{"ordertype", "sip"},
+			{"mode", "physical"},
+			{"liquidscheme", "true"},
+			{"overnightscheme", "false"},
+			{"extendedhours", "false"},
+		},
+	}
+	want := ActionSet{
+		properties: []Property{{"amfiordercutoff", "1330"}, {"bseordercutoff", "1300"},
+			{"fundscutoff", "1230"}},
+	}
+	*tests = append(*tests, doMatchTest{
+		"sip liquid order",
 		entity,
 		ruleSets["main"],
 		ActionSet{},
