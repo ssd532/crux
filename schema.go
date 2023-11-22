@@ -5,12 +5,12 @@ var ruleSchemas = []RuleSchema{
 	{
 		"inventoryitem",
 		[]AttrSchema{
-			{"cat", "enum"},
-			{"fullname", "str"},
-			{"ageinstock", "int"},
-			{"mrp", "float"},
-			{"received", "ts"},
-			{"bulkorder", "bool"},
+			{"cat", typeEnum},
+			{"fullname", typeStr},
+			{"ageinstock", typeInt},
+			{"mrp", typeFloat},
+			{"received", typeTS},
+			{"bulkorder", typeBool},
 		},
 	},
 }

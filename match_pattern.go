@@ -7,6 +7,25 @@ import (
 	"time"
 )
 
+const (
+	typeBool  = "bool"
+	typeInt   = "int"
+	typeFloat = "float"
+	typeStr   = "str"
+	typeEnum  = "enum"
+	typeTS    = "ts"
+
+	trueStr  = "true"
+	falseStr = "false"
+
+	opEQ = "eq"
+	opNE = "ne"
+	opLT = "lt"
+	opLE = "le"
+	opGT = "gt"
+	opGE = "ge"
+)
+
 func matchPattern(entity Entity, rulePattern []RulePatternTerm, actionSet ActionSet) (bool, error) {
 	for _, term := range rulePattern {
 		valType := ""
@@ -22,14 +41,14 @@ func matchPattern(entity Entity, rulePattern []RulePatternTerm, actionSet Action
 			// the action-set
 			for _, task := range actionSet.tasks {
 				if task == term.attrName {
-					entityAttrVal = "true"
-					valType = "bool"
+					entityAttrVal = trueStr
+					valType = typeBool
 				}
 			}
 		}
 		if entityAttrVal == "" {
-			entityAttrVal = "false"
-			valType = "bool"
+			entityAttrVal = falseStr
+			valType = typeBool
 		}
 		matched, err := makeComparison(entityAttrVal, term.attrVal, valType, term.op)
 		if err != nil {
@@ -61,28 +80,28 @@ func makeComparison(entityAttrVal string, termAttrVal any, valType string, op st
 		return false, fmt.Errorf("error converting value: %w", err)
 	}
 	switch op {
-	case "eq":
+	case opEQ:
 		return entityAttrValConv == termAttrVal, nil
-	case "ne":
+	case opNE:
 		return entityAttrValConv != termAttrVal, nil
 	}
-	orderedTypes := map[string]bool{"int": true, "float": true, "ts": true, "str": true}
+	orderedTypes := map[string]bool{typeInt: true, typeFloat: true, typeTS: true, typeStr: true}
 	if !orderedTypes[valType] {
 		return false, errors.New("not an ordered type")
 	}
 	var result int8
 	var match bool
 	switch op {
-	case "lt":
+	case opLT:
 		result, err = compare(entityAttrValConv, termAttrVal)
 		match = (result == -1)
-	case "le":
+	case opLE:
 		result, err = compare(entityAttrValConv, termAttrVal)
 		match = (result == -1) || (result == 0)
-	case "gt":
+	case opGT:
 		result, err = compare(entityAttrValConv, termAttrVal)
 		match = (result == 1)
-	case "ge":
+	case opGE:
 		result, err = compare(entityAttrValConv, termAttrVal)
 		match = (result == 1) || (result == 0)
 	}
@@ -96,15 +115,15 @@ func convertEntityAttrVal(entityAttrVal string, valType string) (any, error) {
 	var entityAttrValConv any
 	var err error
 	switch valType {
-	case "bool":
+	case typeBool:
 		entityAttrValConv, err = strconv.ParseBool(entityAttrVal)
-	case "int":
+	case typeInt:
 		entityAttrValConv, err = strconv.Atoi(entityAttrVal)
-	case "float":
+	case typeFloat:
 		entityAttrValConv, err = strconv.ParseFloat(entityAttrVal, 64)
-	case "str", "enum":
+	case typeStr, typeEnum:
 		entityAttrValConv = entityAttrVal
-	case "ts":
+	case typeTS:
 		entityAttrValConv, err = time.Parse(timeLayout, entityAttrVal)
 	}
 	if err != nil {

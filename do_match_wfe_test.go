@@ -14,9 +14,6 @@ const (
 	nextStep   = "nextstep"
 	done       = "done"
 
-	trueStr  = "true"
-	falseStr = "false"
-
 	uccCreationClass = "ucccreation"
 	prepareAOFClass  = "prepareaof"
 	validateAOFClass = "validateaof"
@@ -27,9 +24,9 @@ func testUCCCreation(tests *[]doMatchTest) {
 	ruleSchemas = append(ruleSchemas, RuleSchema{
 		uccCreationClass,
 		[]AttrSchema{
-			{step, "str"},
-			{stepFailed, "bool"},
-			{"mode", "enum"},
+			{step, typeStr},
+			{stepFailed, typeBool},
+			{"mode", typeEnum},
 		},
 	})
 
@@ -49,8 +46,8 @@ func testUCCCreation(tests *[]doMatchTest) {
 func setupUCCCreationRuleSet() {
 	rule1 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", start},
-			{stepFailed, "eq", false},
+			{step, opEQ, start},
+			{stepFailed, opEQ, false},
 		},
 		RuleActions{
 			tasks:      []string{"getcustdetails"},
@@ -59,8 +56,8 @@ func setupUCCCreationRuleSet() {
 	}
 	rule2 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", "getcustdetails"},
-			{stepFailed, "eq", false},
+			{step, opEQ, "getcustdetails"},
+			{stepFailed, opEQ, false},
 		},
 		RuleActions{
 			tasks:      []string{"aof", "kycvalid", "nomauth"},
@@ -69,9 +66,9 @@ func setupUCCCreationRuleSet() {
 	}
 	rule3 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", "getcustdetails"},
-			{stepFailed, "eq", false},
-			{"mode", "eq", "physical"},
+			{step, opEQ, "getcustdetails"},
+			{stepFailed, opEQ, false},
+			{"mode", opEQ, "physical"},
 		},
 		RuleActions{
 			tasks:      []string{"bankaccvalid"},
@@ -80,9 +77,9 @@ func setupUCCCreationRuleSet() {
 	}
 	rule4 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", "getcustdetails"},
-			{stepFailed, "eq", false},
-			{"mode", "eq", "demat"},
+			{step, opEQ, "getcustdetails"},
+			{stepFailed, opEQ, false},
+			{"mode", opEQ, "demat"},
 		},
 		RuleActions{
 			tasks:      []string{"dpandbankaccvalid"},
@@ -91,8 +88,8 @@ func setupUCCCreationRuleSet() {
 	}
 	rule5 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", "readyforauthlink"},
-			{stepFailed, "eq", false},
+			{step, opEQ, "readyforauthlink"},
+			{stepFailed, opEQ, false},
 		},
 		RuleActions{
 			tasks:      []string{"sendauthlinktoclient"},
@@ -101,8 +98,8 @@ func setupUCCCreationRuleSet() {
 	}
 	rule6 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", "sendauthlinktoclient"},
-			{stepFailed, "eq", false},
+			{step, opEQ, "sendauthlinktoclient"},
+			{stepFailed, opEQ, false},
 		},
 		RuleActions{
 			properties: []Property{{done, trueStr}},
@@ -110,7 +107,7 @@ func setupUCCCreationRuleSet() {
 	}
 	rule7 := Rule{
 		[]RulePatternTerm{
-			{stepFailed, "eq", true},
+			{stepFailed, opEQ, true},
 		},
 		RuleActions{
 			properties: []Property{{done, trueStr}},
@@ -237,8 +234,8 @@ func testPrepareAOF(tests *[]doMatchTest) {
 	ruleSchemas = append(ruleSchemas, RuleSchema{
 		prepareAOFClass,
 		[]AttrSchema{
-			{step, "str"},
-			{stepFailed, "bool"},
+			{step, typeStr},
+			{stepFailed, typeBool},
 		},
 	})
 
@@ -350,8 +347,8 @@ func testPrepareAOFEnd(tests *[]doMatchTest) {
 func setupRuleSetForPrepareAOF() {
 	rule1 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", start},
-			{stepFailed, "eq", false},
+			{step, opEQ, start},
+			{stepFailed, opEQ, false},
 		},
 		RuleActions{
 			tasks:      []string{"downloadform"},
@@ -360,8 +357,8 @@ func setupRuleSetForPrepareAOF() {
 	}
 	rule2 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", "downloadform"},
-			{stepFailed, "eq", false},
+			{step, opEQ, "downloadform"},
+			{stepFailed, opEQ, false},
 		},
 		RuleActions{
 			tasks:      []string{"printprefilledform"},
@@ -370,8 +367,8 @@ func setupRuleSetForPrepareAOF() {
 	}
 	rule3 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", "printprefilledform"},
-			{stepFailed, "eq", false},
+			{step, opEQ, "printprefilledform"},
+			{stepFailed, opEQ, false},
 		},
 		RuleActions{
 			tasks:      []string{"signform"},
@@ -380,8 +377,8 @@ func setupRuleSetForPrepareAOF() {
 	}
 	rule4 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", "signform"},
-			{stepFailed, "eq", false},
+			{step, opEQ, "signform"},
+			{stepFailed, opEQ, false},
 		},
 		RuleActions{
 			tasks:      []string{"receivesignedform"},
@@ -390,8 +387,8 @@ func setupRuleSetForPrepareAOF() {
 	}
 	rule5 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", "receivesignedform"},
-			{stepFailed, "eq", false},
+			{step, opEQ, "receivesignedform"},
+			{stepFailed, opEQ, false},
 		},
 		RuleActions{
 			tasks:      []string{"uploadsignedform"},
@@ -400,8 +397,8 @@ func setupRuleSetForPrepareAOF() {
 	}
 	rule6 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", "uploadsignedform"},
-			{stepFailed, "eq", false},
+			{step, opEQ, "uploadsignedform"},
+			{stepFailed, opEQ, false},
 		},
 		RuleActions{
 			tasks:      []string{},
@@ -410,7 +407,7 @@ func setupRuleSetForPrepareAOF() {
 	}
 	rule7 := Rule{
 		[]RulePatternTerm{
-			{stepFailed, "eq", true},
+			{stepFailed, opEQ, true},
 		},
 		RuleActions{
 			properties: []Property{{done, trueStr}},
@@ -425,9 +422,9 @@ func testValidateAOF(tests *[]doMatchTest) {
 	ruleSchemas = append(ruleSchemas, RuleSchema{
 		validateAOFClass,
 		[]AttrSchema{
-			{step, "str"},
-			{stepFailed, "bool"},
-			{"aofexists", "bool"},
+			{step, typeStr},
+			{stepFailed, typeBool},
+			{"aofexists", typeBool},
 		},
 	})
 
@@ -492,9 +489,9 @@ func testValidateAOFEnd(tests *[]doMatchTest) {
 func setupRuleSetForValidateAOF() {
 	rule1 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", start},
-			{stepFailed, "eq", false},
-			{"aofexists", "eq", true},
+			{step, opEQ, start},
+			{stepFailed, opEQ, false},
+			{"aofexists", opEQ, true},
 		},
 		RuleActions{
 			properties: []Property{{done, trueStr}},
@@ -502,9 +499,9 @@ func setupRuleSetForValidateAOF() {
 	}
 	rule2 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", start},
-			{stepFailed, "eq", false},
-			{"aofexists", "eq", false},
+			{step, opEQ, start},
+			{stepFailed, opEQ, false},
+			{"aofexists", opEQ, false},
 		},
 		RuleActions{
 			tasks:      []string{"sendaoftorta"},
@@ -513,9 +510,9 @@ func setupRuleSetForValidateAOF() {
 	}
 	rule3 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", "sendaoftorta"},
-			{stepFailed, "eq", false},
-			{"aofexists", "eq", false},
+			{step, opEQ, "sendaoftorta"},
+			{stepFailed, opEQ, false},
+			{"aofexists", opEQ, false},
 		},
 		RuleActions{
 			tasks:      []string{"getresponsefromrta"},
@@ -524,9 +521,9 @@ func setupRuleSetForValidateAOF() {
 	}
 	rule4 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", "getresponsefromrta"},
-			{stepFailed, "eq", false},
-			{"aofexists", "eq", false},
+			{step, opEQ, "getresponsefromrta"},
+			{stepFailed, opEQ, false},
+			{"aofexists", opEQ, false},
 		},
 		RuleActions{
 			properties: []Property{{done, trueStr}},
@@ -534,7 +531,7 @@ func setupRuleSetForValidateAOF() {
 	}
 	rule5 := Rule{
 		[]RulePatternTerm{
-			{stepFailed, "eq", true},
+			{stepFailed, opEQ, true},
 		},
 		RuleActions{
 			properties: []Property{{done, trueStr}},
@@ -549,10 +546,10 @@ func testComplexWF(tests *[]doMatchTest) {
 	ruleSchemas = append(ruleSchemas, RuleSchema{
 		complexWFClass,
 		[]AttrSchema{
-			{step, "str"},
-			{stepFailed, "bool"},
-			{"type", "enum"},
-			{"loc", "enum"},
+			{step, typeStr},
+			{stepFailed, typeBool},
+			{"type", typeEnum},
+			{"loc", typeEnum},
 		},
 	})
 
@@ -576,8 +573,8 @@ func testComplexWF(tests *[]doMatchTest) {
 func setupRuleSetMainForComplexWF() {
 	rule1 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", start},
-			{stepFailed, "eq", false},
+			{step, opEQ, start},
+			{stepFailed, opEQ, false},
 		},
 		RuleActions{
 			tasks:      []string{"s1.1"},
@@ -586,9 +583,9 @@ func setupRuleSetMainForComplexWF() {
 	}
 	rule2 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", "s1.1"},
-			{stepFailed, "eq", false},
-			{"type", "eq", "saving"},
+			{step, opEQ, "s1.1"},
+			{stepFailed, opEQ, false},
+			{"type", opEQ, "saving"},
 		},
 		RuleActions{
 			thenCall:   "rs2",
@@ -598,8 +595,8 @@ func setupRuleSetMainForComplexWF() {
 	}
 	rule3 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", "s1.1"},
-			{stepFailed, "eq", false},
+			{step, opEQ, "s1.1"},
+			{stepFailed, opEQ, false},
 		},
 		RuleActions{
 			tasks:      []string{"s1.2"},
@@ -608,8 +605,8 @@ func setupRuleSetMainForComplexWF() {
 	}
 	rule4 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", "l1.3"},
-			{stepFailed, "eq", false},
+			{step, opEQ, "l1.3"},
+			{stepFailed, opEQ, false},
 		},
 		RuleActions{
 			properties: []Property{{done, trueStr}},
@@ -617,8 +614,8 @@ func setupRuleSetMainForComplexWF() {
 	}
 	rule5 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", "l3.2"},
-			{stepFailed, "eq", false},
+			{step, opEQ, "l3.2"},
+			{stepFailed, opEQ, false},
 		},
 		RuleActions{
 			properties: []Property{{done, trueStr}},
@@ -626,7 +623,7 @@ func setupRuleSetMainForComplexWF() {
 	}
 	rule6 := Rule{
 		[]RulePatternTerm{
-			{stepFailed, "eq", true},
+			{stepFailed, opEQ, true},
 		},
 		RuleActions{
 			properties: []Property{{done, trueStr}},
@@ -641,8 +638,8 @@ func setupRuleSetMainForComplexWF() {
 func setupRuleSet2ForComplexWF() {
 	rule1 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", "s1.1"},
-			{stepFailed, "eq", false},
+			{step, opEQ, "s1.1"},
+			{stepFailed, opEQ, false},
 		},
 		RuleActions{
 			tasks:      []string{"s2.1"},
@@ -658,9 +655,9 @@ func setupRuleSet2ForComplexWF() {
 func setupRuleSet3ForComplexWF() {
 	rule1 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", "s1.1"},
-			{stepFailed, "eq", false},
-			{"loc", "eq", "urban"},
+			{step, opEQ, "s1.1"},
+			{stepFailed, opEQ, false},
+			{"loc", opEQ, "urban"},
 		},
 		RuleActions{
 			tasks:      []string{"s3.1"},
@@ -670,9 +667,9 @@ func setupRuleSet3ForComplexWF() {
 	}
 	rule2 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", "s1.1"},
-			{stepFailed, "eq", false},
-			{"loc", "eq", "rural"},
+			{step, opEQ, "s1.1"},
+			{stepFailed, opEQ, false},
+			{"loc", opEQ, "rural"},
 		},
 		RuleActions{
 			tasks:      []string{"s3.2"},
@@ -682,8 +679,8 @@ func setupRuleSet3ForComplexWF() {
 	}
 	rule3 := Rule{
 		[]RulePatternTerm{
-			{step, "eq", "s1.1"},
-			{stepFailed, "eq", false},
+			{step, opEQ, "s1.1"},
+			{stepFailed, opEQ, false},
 		},
 		RuleActions{
 			tasks:      []string{"s3.3"},
