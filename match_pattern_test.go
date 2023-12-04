@@ -143,7 +143,7 @@ func TestMatchPattern(t *testing.T) {
 
 	// Test: error converting value
 	testNames = append(testNames, "deliberate error converting value")
-	entities = append(entities, Entity{"inventoryitems", []Attr{
+	entities = append(entities, Entity{inventoryItemClass, []Attr{
 		{"ageinstock", "abc"},
 	}})
 	rulePatterns = append(rulePatterns, []RulePatternTerm{

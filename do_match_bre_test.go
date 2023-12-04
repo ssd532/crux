@@ -101,13 +101,13 @@ func testReturn(tests *[]doMatchTest) {
 
 func testTransactions(tests *[]doMatchTest) {
 	ruleSchemas = append(ruleSchemas, RuleSchema{
-		transactionClass,
-		[]AttrSchema{
-			{"productname", typeStr},
-			{"price", typeInt},
-			{"inwintersale", typeBool},
-			{"paymenttype", typeEnum},
-			{"ismember", typeBool},
+		class: transactionClass,
+		patternSchema: []AttrSchema{
+			{name: "productname", valType: typeStr},
+			{name: "price", valType: typeInt},
+			{name: "inwintersale", valType: typeBool},
+			{name: "paymenttype", valType: typeEnum},
+			{name: "ismember", valType: typeBool},
 		},
 	})
 
@@ -580,11 +580,12 @@ func testNonMemberDiscKettle110Card(tests *[]doMatchTest) {
 }
 
 func testPurchases(tests *[]doMatchTest) {
-	ruleSchemas = append(ruleSchemas, RuleSchema{purchaseClass,
-		[]AttrSchema{
-			{"product", typeStr},
-			{"price", typeFloat},
-			{"ismember", typeBool},
+	ruleSchemas = append(ruleSchemas, RuleSchema{
+		class: purchaseClass,
+		patternSchema: []AttrSchema{
+			{name: "product", valType: typeStr},
+			{name: "price", valType: typeFloat},
+			{name: "ismember", valType: typeBool},
 		},
 	})
 
@@ -1031,13 +1032,17 @@ func setupRuleSetForPurchases() {
 
 func testOrders(tests *[]doMatchTest) {
 	ruleSchemas = append(ruleSchemas, RuleSchema{
-		orderClass,
-		[]AttrSchema{
-			{"ordertype", typeEnum},
-			{"mode", typeEnum},
-			{"liquidscheme", typeBool},
-			{"overnightscheme", typeBool},
-			{"extendedhours", typeBool},
+		class: orderClass,
+		patternSchema: []AttrSchema{
+			{name: "ordertype", valType: typeEnum},
+			{name: "mode", valType: typeEnum},
+			{name: "liquidscheme", valType: typeBool},
+			{name: "overnightscheme", valType: typeBool},
+			{name: "extendedhours", valType: typeBool},
+		},
+		actionSchema: ActionSchema{
+			tasks:      []string{"unitstoamc", "unitstorta"},
+			properties: []string{"amfiordercutoff", "bseordercutoff", "fundscutoff", "unitscutoff"},
 		},
 	})
 

@@ -8,12 +8,6 @@ and to make it easier to understand, add to, and edit these tests
 package main
 
 const (
-	step       = "step"
-	stepFailed = "stepfailed"
-	start      = "START"
-	nextStep   = "nextstep"
-	done       = "done"
-
 	uccCreationClass = "ucccreation"
 	prepareAOFClass  = "prepareaof"
 	validateAOFClass = "validateaof"
@@ -22,11 +16,11 @@ const (
 
 func testUCCCreation(tests *[]doMatchTest) {
 	ruleSchemas = append(ruleSchemas, RuleSchema{
-		uccCreationClass,
-		[]AttrSchema{
-			{step, typeStr},
-			{stepFailed, typeBool},
-			{"mode", typeEnum},
+		class: uccCreationClass,
+		patternSchema: []AttrSchema{
+			{name: step, valType: typeStr},
+			{name: stepFailed, valType: typeBool},
+			{name: "mode", valType: typeEnum},
 		},
 	})
 
@@ -232,10 +226,10 @@ func testUCCEndFailure(tests *[]doMatchTest) {
 
 func testPrepareAOF(tests *[]doMatchTest) {
 	ruleSchemas = append(ruleSchemas, RuleSchema{
-		prepareAOFClass,
-		[]AttrSchema{
-			{step, typeStr},
-			{stepFailed, typeBool},
+		class: prepareAOFClass,
+		patternSchema: []AttrSchema{
+			{name: step, valType: typeStr},
+			{name: stepFailed, valType: typeBool},
 		},
 	})
 
@@ -420,11 +414,11 @@ func setupRuleSetForPrepareAOF() {
 
 func testValidateAOF(tests *[]doMatchTest) {
 	ruleSchemas = append(ruleSchemas, RuleSchema{
-		validateAOFClass,
-		[]AttrSchema{
-			{step, typeStr},
-			{stepFailed, typeBool},
-			{"aofexists", typeBool},
+		class: validateAOFClass,
+		patternSchema: []AttrSchema{
+			{name: step, valType: typeStr},
+			{name: stepFailed, valType: typeBool},
+			{name: "aofexists", valType: typeBool},
 		},
 	})
 
@@ -544,12 +538,12 @@ func setupRuleSetForValidateAOF() {
 
 func testComplexWF(tests *[]doMatchTest) {
 	ruleSchemas = append(ruleSchemas, RuleSchema{
-		complexWFClass,
-		[]AttrSchema{
-			{step, typeStr},
-			{stepFailed, typeBool},
-			{"type", typeEnum},
-			{"loc", typeEnum},
+		class: complexWFClass,
+		patternSchema: []AttrSchema{
+			{name: step, valType: typeStr},
+			{name: stepFailed, valType: typeBool},
+			{name: "type", valType: typeEnum},
+			{name: "loc", valType: typeEnum},
 		},
 	})
 
