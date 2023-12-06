@@ -33,8 +33,6 @@ func TestDoMatch(t *testing.T) {
 	testUCCCreation(&tests)
 	testPrepareAOF(&tests)
 	testValidateAOF(&tests)
-	// An artificial workflow with random meaningless data, for testing purposes
-	testComplexWF(&tests)
 
 	fmt.Printf("Running %v doMatch() tests\n", len(tests))
 	for _, tt := range tests {

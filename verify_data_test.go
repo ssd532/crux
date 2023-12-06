@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 type verifySchemaTest struct {
 	name    string
@@ -398,6 +401,7 @@ func TestVerifySchema(t *testing.T) {
 	testMissingNextStep(&tests)
 	testTasksAndStepDiscrepancy(&tests)
 
+	fmt.Println("Running", len(tests), "verifyRuleSchema() tests")
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := verifyRuleSchema(tt.rs, tt.isWF)

@@ -109,7 +109,6 @@ func verifyActionSchema(rs RuleSchema, isWF bool) (bool, error) {
 	if isWF && (!nextStepFound || !doneFound) {
 		return false, fmt.Errorf("action-schema for %v does not contain both the properties 'nextstep' and 'done'", rs.class)
 	}
-	// TEST THE LINE BELOW CAREFULLY!
 	if isWF && !reflect.DeepEqual(getTasksMapForWF(rs.actionSchema.tasks), getStepAttrVals(rs)) {
 		return false, fmt.Errorf("action-schema tasks for %v are not the same as valid values for 'step' in pattern-schema", rs.class)
 	}
