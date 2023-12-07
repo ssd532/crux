@@ -17,9 +17,7 @@ type doMatchTest struct {
 func TestDoMatch(t *testing.T) {
 	tests := []doMatchTest{}
 
-	/**************
-	   BRE tests
-	**************/
+	// BRE tests
 	testBasic(&tests)
 	testExit(&tests)
 	testReturn(&tests)
@@ -27,9 +25,7 @@ func TestDoMatch(t *testing.T) {
 	testPurchases(&tests)
 	testOrders(&tests)
 
-	/**************
-	   WFE tests
-	**************/
+	// WFE tests
 	testUCCCreation(&tests)
 	testPrepareAOF(&tests)
 	testValidateAOF(&tests)

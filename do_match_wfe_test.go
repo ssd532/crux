@@ -15,15 +15,7 @@ const (
 )
 
 func testUCCCreation(tests *[]doMatchTest) {
-	ruleSchemas = append(ruleSchemas, RuleSchema{
-		class: uccCreationClass,
-		patternSchema: []AttrSchema{
-			{name: step, valType: typeEnum},
-			{name: stepFailed, valType: typeBool},
-			{name: "mode", valType: typeEnum},
-		},
-	})
-
+	setupUCCCreationSchema()
 	setupUCCCreationRuleSet()
 
 	testUCCStart(tests)
@@ -35,6 +27,22 @@ func testUCCCreation(tests *[]doMatchTest) {
 	testUCCAOFFail(tests)
 	testUCCEndSuccess(tests)
 	testUCCEndFailure(tests)
+}
+
+func setupUCCCreationSchema() {
+	ruleSchemas = append(ruleSchemas, RuleSchema{
+		class: uccCreationClass,
+		patternSchema: []AttrSchema{
+			{name: step, valType: typeEnum},
+			{name: stepFailed, valType: typeBool},
+			{name: "mode", valType: typeEnum},
+		},
+		actionSchema: ActionSchema{
+			tasks: []string{"getcustdetails", "aof", "kycvalid", "nomauth", "bankaccvalid",
+				"dpandbankaccvalid", "sendauthlinktoclient"},
+			properties: []string{nextStep, done},
+		},
+	})
 }
 
 func setupUCCCreationRuleSet() {

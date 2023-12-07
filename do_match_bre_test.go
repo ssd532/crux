@@ -10,6 +10,8 @@ package main
 import "testing"
 
 const (
+	mainRS = "main"
+
 	inventoryItemClass = "inventoryitem"
 	transactionClass   = "transaction"
 	purchaseClass      = "purchase"
@@ -26,7 +28,7 @@ var sampleEntity = Entity{inventoryItemClass, []Attr{
 }}
 
 func testBasic(tests *[]doMatchTest) {
-	ruleSet := RuleSet{1, inventoryItemClass, "main",
+	ruleSet := RuleSet{1, inventoryItemClass, mainRS,
 		[]Rule{{
 			[]RulePatternTerm{{"cat", opEQ, "textbook"}},
 			RuleActions{
@@ -61,7 +63,7 @@ func testExit(tests *[]doMatchTest) {
 	rA4 := RuleActions{
 		tasks: []string{"autumnsale"},
 	}
-	ruleSet := RuleSet{1, inventoryItemClass, "main", []Rule{
+	ruleSet := RuleSet{1, inventoryItemClass, mainRS, []Rule{
 		{[]RulePatternTerm{{"cat", opEQ, "refbook"}}, rA1},                           // no match
 		{[]RulePatternTerm{{"ageinstock", opLT, 7}, {"cat", opEQ, "textbook"}}, rA2}, // match
 		{[]RulePatternTerm{{"summersale", opEQ, true}}, rA3},                         // match then exit
@@ -87,7 +89,7 @@ func testReturn(tests *[]doMatchTest) {
 	rA3 := RuleActions{
 		tasks: []string{"autumnsale"},
 	}
-	ruleSet := RuleSet{1, inventoryItemClass, "main", []Rule{
+	ruleSet := RuleSet{1, inventoryItemClass, mainRS, []Rule{
 		{[]RulePatternTerm{{"ageinstock", opLT, 7}, {"cat", opEQ, "textbook"}}, rA1}, // match
 		{[]RulePatternTerm{{"summersale", opEQ, true}}, rA2},                         // match then return
 		{[]RulePatternTerm{{"ageinstock", opLT, 7}}, rA3},                            // ignored
@@ -166,7 +168,7 @@ func setupRuleSetMainForTransaction() {
 		},
 		RuleActions{tasks: []string{"freebag"}},
 	}
-	ruleSets["main"] = RuleSet{1, transactionClass, "main",
+	ruleSets[mainRS] = RuleSet{1, transactionClass, mainRS,
 		[]Rule{rule1, rule2, rule3, rule4},
 	}
 }
@@ -298,7 +300,7 @@ func testWinterDiscJacket60(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"winterdisc jacket 60",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -321,7 +323,7 @@ func testWinterDiscJacket40(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"winterdisc jacket 40",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -344,7 +346,7 @@ func testWinterDiscKettle110Cash(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"winterdisc kettle 110 cash",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -367,7 +369,7 @@ func testWinterDiscKettle110Card(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"winterdisc kettle 110 card",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -389,7 +391,7 @@ func testMemberDiscLamp60(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"memberdisc lamp 60",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -412,7 +414,7 @@ func testMemberDiscKettle60Card(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"memberdisc kettle 60 card",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -435,7 +437,7 @@ func testMemberDiscKettle60Cash(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"memberdisc kettle 60 cash",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -458,7 +460,7 @@ func testMemberDiscKettle110Card(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"memberdisc kettle 110 card",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -481,7 +483,7 @@ func testMemberDiscKettle110Cash(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"memberdisc kettle 110 cash",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -504,7 +506,7 @@ func testNonMemberDiscLamp30(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"nonmemberdisc lamp 30",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -527,7 +529,7 @@ func testNonMemberDiscKettle70(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"nonmemberdisc kettle 70",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -550,7 +552,7 @@ func testNonMemberDiscKettle110Cash(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"nonmemberdisc kettle 110 cash",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -573,22 +575,14 @@ func testNonMemberDiscKettle110Card(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"nonmemberdisc kettle 110 card",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
 }
 
 func testPurchases(tests *[]doMatchTest) {
-	ruleSchemas = append(ruleSchemas, RuleSchema{
-		class: purchaseClass,
-		patternSchema: []AttrSchema{
-			{name: "product", valType: typeStr},
-			{name: "price", valType: typeFloat},
-			{name: "ismember", valType: typeBool},
-		},
-	})
-
+	setupPurchaseRuleSchema()
 	setupRuleSetForPurchases()
 
 	testJacket35(tests)
@@ -611,6 +605,22 @@ func testPurchases(tests *[]doMatchTest) {
 	testOven55(tests)
 }
 
+func setupPurchaseRuleSchema() {
+	ruleSchemas = append(ruleSchemas, RuleSchema{
+		class: purchaseClass,
+		patternSchema: []AttrSchema{
+			{name: "product", valType: typeStr},
+			{name: "price", valType: typeFloat},
+			{name: "ismember", valType: typeBool},
+		},
+		actionSchema: ActionSchema{
+			tasks: []string{"freepen", "freebottle", "freepencil", "freemug", "freejar", "freeplant",
+				"freebag", "freenotebook"},
+			properties: []string{"discount", "pointsmult"},
+		},
+	})
+}
+
 func testJacket35(tests *[]doMatchTest) {
 	entity := Entity{purchaseClass,
 		[]Attr{
@@ -626,7 +636,7 @@ func testJacket35(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"jacket price 35",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -647,7 +657,7 @@ func testJacket55ForMember(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"jacket price 55 for member",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -668,7 +678,7 @@ func testJacket55ForNonMember(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"jacket price 55 for non-member",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -689,7 +699,7 @@ func testJacket75ForMember(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"jacket price 75 for member",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -710,7 +720,7 @@ func testJacket75ForNonMember(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"jacket price 75 for non-member",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -731,7 +741,7 @@ func testLamp35(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"lamp price 35",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -752,7 +762,7 @@ func testLamp55(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"lamp price 55",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -773,7 +783,7 @@ func testLamp75ForMember(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"lamp price 75 for member",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -794,7 +804,7 @@ func testLamp75ForNonMember(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"lamp price 75 for non-member",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -814,7 +824,7 @@ func testKettle35(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"kettle price 35",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -835,7 +845,7 @@ func testKettle55(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"kettle price 55",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -855,7 +865,7 @@ func testKettle75ForMember(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"kettle price 75 for member",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -876,7 +886,7 @@ func testKettle75ForNonMember(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"kettle price 75 for non-member",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -894,7 +904,7 @@ func testOven35(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"oven price 35",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -914,7 +924,7 @@ func testOven55(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"oven price 55",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -1025,7 +1035,7 @@ func setupRuleSetForPurchases() {
 			tasks: []string{"freenotebook"},
 		},
 	}
-	ruleSets["main"] = RuleSet{1, purchaseClass, "main",
+	ruleSets[mainRS] = RuleSet{1, purchaseClass, mainRS,
 		[]Rule{rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8, rule9, rule10, rule11},
 	}
 }
@@ -1086,7 +1096,7 @@ func setupRuleSetMainForOrder() {
 			thenCall:   "otherordertypes",
 		},
 	}
-	ruleSets["main"] = RuleSet{1, orderClass, "main",
+	ruleSets[mainRS] = RuleSet{1, orderClass, mainRS,
 		[]Rule{rule1, rule2, rule3},
 	}
 }
@@ -1164,7 +1174,7 @@ func testSIPOrder(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"sip order",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -1187,7 +1197,7 @@ func testSwitchDematOrder(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"switch demat order",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -1210,7 +1220,7 @@ func testSwitchDematExtHours(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"switch demat ext-hours order",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -1233,7 +1243,7 @@ func testRedemptionDematExtHours(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"redemption demat ext-hours order",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -1256,7 +1266,7 @@ func testPurchaseOvernightOrder(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"purchase overnight order",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -1279,7 +1289,7 @@ func testSIPLiquidOrder(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"sip liquid order",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -1302,7 +1312,7 @@ func testSwitchPhysicalOrder(tests *[]doMatchTest) {
 	*tests = append(*tests, doMatchTest{
 		"switch physical order",
 		entity,
-		ruleSets["main"],
+		ruleSets[mainRS],
 		ActionSet{},
 		want,
 	})
@@ -1311,7 +1321,7 @@ func testSwitchPhysicalOrder(tests *[]doMatchTest) {
 func testCycleError(t *testing.T) {
 	t.Log("Running cycle test")
 	setupRuleSetsForCycleError()
-	_, _, err := doMatch(sampleEntity, ruleSets["main"], ActionSet{}, map[string]bool{})
+	_, _, err := doMatch(sampleEntity, ruleSets[mainRS], ActionSet{}, map[string]bool{})
 	if err == nil {
 		t.Errorf("test cycle: expected but did not get error")
 	}
@@ -1327,7 +1337,7 @@ func setupRuleSetsForCycleError() {
 			thenCall: "second",
 		},
 	}
-	ruleSets["main"] = RuleSet{1, inventoryItemClass, "main",
+	ruleSets[mainRS] = RuleSet{1, inventoryItemClass, mainRS,
 		[]Rule{rule1},
 	}
 
