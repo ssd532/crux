@@ -1,3 +1,8 @@
+/*
+This file contains verifyRuleSchema() and verifyRuleSet(), and helper functions called inside
+these two functions.
+*/
+
 package main
 
 import (
@@ -8,13 +13,13 @@ import (
 )
 
 const (
-	cruxIDRegExp = `^[a-z][a-z0-9_]*$`
-
 	step       = "step"
 	stepFailed = "stepfailed"
 	start      = "START"
 	nextStep   = "nextstep"
 	done       = "done"
+
+	cruxIDRegExp = `^[a-z][a-z0-9_]*$`
 )
 
 var validTypes = map[string]bool{
@@ -139,51 +144,54 @@ func getStepAttrVals(rs RuleSchema) map[string]bool {
 	return nil
 }
 
-func verifyRuleSet(ruleSet RuleSet, isWF bool) (bool, error) {
-	schema, err := getSchema(ruleSet.class)
+// Parameters
+// rs RuleSet: the RuleSet to be verified
+// isWF bool: true if the RuleSet is a workflow, otherwise false
+func verifyRuleSet(rs RuleSet, isWF bool) (bool, error) {
+	schema, err := getSchema(rs.Class)
 	if err != nil {
 		return false, err
 	}
-	if _, err = verifyRulePatterns(ruleSet, schema, isWF); err != nil {
+	if _, err = verifyRulePatterns(rs, schema, isWF); err != nil {
 		return false, err
 	}
-	if _, err = verifyRuleActions(ruleSet, schema, isWF); err != nil {
+	if _, err = verifyRuleActions(rs, schema, isWF); err != nil {
 		return false, err
 	}
 	return true, nil
 }
 
 func verifyRulePatterns(ruleSet RuleSet, schema RuleSchema, isWF bool) (bool, error) {
-	for _, rule := range ruleSet.rules {
-		for _, term := range rule.rulePattern {
-			valType := getType(schema, term.attrName)
+	for _, rule := range ruleSet.Rules {
+		for _, term := range rule.RulePattern {
+			valType := getType(schema, term.AttrName)
 			if valType == "" {
 				// If the attribute name is not in the pattern-schema, we check if it's a task "tag"
 				// by checking for its presence in the action-schema
-				if !isStringInArray(term.attrName, schema.actionSchema.tasks) {
-					return false, fmt.Errorf("attribute does not exist in schema: %v", term.attrName)
+				if !isStringInArray(term.AttrName, schema.actionSchema.tasks) {
+					return false, fmt.Errorf("attribute does not exist in schema: %v", term.AttrName)
 				}
 				// If it is a tag, the value type is set to bool
 				valType = typeBool
 			}
-			if !verifyType(term.attrVal, valType) {
-				return false, fmt.Errorf("value of this attribute does not match schema type: %v", term.attrName)
+			if !verifyType(term.AttrVal, valType) {
+				return false, fmt.Errorf("value of this attribute does not match schema type: %v", term.AttrName)
 			}
-			if !validOps[term.op] {
-				return false, fmt.Errorf("invalid operation in rule: %v", term.op)
+			if !validOps[term.Op] {
+				return false, fmt.Errorf("invalid operation in rule: %v", term.Op)
 			}
 		}
 		// Workflows only
 		if isWF {
 			stepFound := false
-			for _, term := range rule.rulePattern {
-				if term.attrName == step {
+			for _, term := range rule.RulePattern {
+				if term.AttrName == step {
 					stepFound = true
 					break
 				}
 			}
 			if !stepFound {
-				return false, fmt.Errorf("no 'step' attribute found in a rule in workflow %v", ruleSet.setName)
+				return false, fmt.Errorf("no 'step' attribute found in a rule in workflow %v", ruleSet.SetName)
 			}
 		}
 	}
@@ -217,6 +225,7 @@ func isStringInArray(s string, arr []string) bool {
 	return false
 }
 
+// Returns whether or not the type of "val" is the same as "valType"
 func verifyType(val any, valType string) bool {
 	var ok bool
 	switch valType {
@@ -237,45 +246,45 @@ func verifyType(val any, valType string) bool {
 }
 
 func verifyRuleActions(ruleSet RuleSet, schema RuleSchema, isWF bool) (bool, error) {
-	for _, rule := range ruleSet.rules {
-		for _, t := range rule.ruleActions.tasks {
+	for _, rule := range ruleSet.Rules {
+		for _, t := range rule.RuleActions.Tasks {
 			if !isStringInArray(t, schema.actionSchema.tasks) {
 				return false, fmt.Errorf("task %v not found in action-schema", t)
 			}
 		}
-		for _, p := range rule.ruleActions.properties {
-			if !isStringInArray(p.name, schema.actionSchema.properties) {
-				return false, fmt.Errorf("property name %v not found in action-schema", p.name)
+		for _, p := range rule.RuleActions.Properties {
+			if !isStringInArray(p.Name, schema.actionSchema.properties) {
+				return false, fmt.Errorf("property name %v not found in action-schema", p.Name)
 			}
 		}
-		if rule.ruleActions.willReturn && rule.ruleActions.willExit {
-			return false, fmt.Errorf("there is a rule with both the RETURN and EXIT instructions in ruleset %v", ruleSet.setName)
+		if rule.RuleActions.WillReturn && rule.RuleActions.WillExit {
+			return false, fmt.Errorf("there is a rule with both the RETURN and EXIT instructions in ruleset %v", ruleSet.SetName)
 		}
 		// Workflows only
 		if isWF {
-			nsFound, doneFound := areNSAndDoneInProps(rule.ruleActions.properties)
+			nsFound, doneFound := areNextStepAndDoneInProps(rule.RuleActions.Properties)
 			if !nsFound && !doneFound {
-				return false, fmt.Errorf("rule found with neither 'nextstep' nor 'done' in ruleset %v", ruleSet.setName)
+				return false, fmt.Errorf("rule found with neither 'nextstep' nor 'done' in ruleset %v", ruleSet.SetName)
 			}
-			if !doneFound && len(rule.ruleActions.tasks) == 0 {
-				return false, fmt.Errorf("no tasks and no 'done=true' in a rule in ruleset %v", ruleSet.setName)
+			if !doneFound && len(rule.RuleActions.Tasks) == 0 {
+				return false, fmt.Errorf("no tasks and no 'done=true' in a rule in ruleset %v", ruleSet.SetName)
 			}
-			currNS := getNextStep(rule.ruleActions.properties)
-			if len(currNS) > 0 && !isStringInArray(currNS, rule.ruleActions.tasks) {
-				return false, fmt.Errorf("`nextstep` value not found in `tasks` in a rule in ruleset %v", ruleSet.setName)
+			currNS := getNextStep(rule.RuleActions.Properties)
+			if len(currNS) > 0 && !isStringInArray(currNS, rule.RuleActions.Tasks) {
+				return false, fmt.Errorf("`nextstep` value not found in `tasks` in a rule in ruleset %v", ruleSet.SetName)
 			}
 		}
 	}
 	return true, nil
 }
 
-func areNSAndDoneInProps(props []Property) (bool, bool) {
+func areNextStepAndDoneInProps(props []Property) (bool, bool) {
 	nsFound, doneFound := false, false
 	for _, p := range props {
-		if p.name == nextStep {
+		if p.Name == nextStep {
 			nsFound = true
 		}
-		if p.name == done && p.val == trueStr {
+		if p.Name == done && p.Val == trueStr {
 			doneFound = true
 		}
 	}
@@ -284,8 +293,8 @@ func areNSAndDoneInProps(props []Property) (bool, bool) {
 
 func getNextStep(props []Property) string {
 	for _, p := range props {
-		if p.name == nextStep {
-			return p.val
+		if p.Name == nextStep {
+			return p.Val
 		}
 	}
 	return ""

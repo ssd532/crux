@@ -12,11 +12,11 @@ func TestCollectActionsBasic(t *testing.T) {
 	}
 
 	ruleActions := RuleActions{
-		tasks:      []string{"yearendsale", "summersale"},
-		properties: []Property{{"cashback", "10"}, {"discount", "9"}},
-		thenCall:   "domesticpo",
-		willReturn: false,
-		willExit:   true,
+		Tasks:      []string{"yearendsale", "summersale"},
+		Properties: []Property{{"cashback", "10"}, {"discount", "9"}},
+		ThenCall:   "domesticpo",
+		WillReturn: false,
+		WillExit:   true,
 	}
 
 	want := ActionSet{
@@ -53,11 +53,11 @@ func TestCollectActionsWithEmptyActionSet(t *testing.T) {
 	actionSet := ActionSet{}
 
 	ruleActions := RuleActions{
-		tasks:      []string{"dodiscount", "yearendsale"},
-		properties: []Property{{"discount", "7"}, {"shipby", "fedex"}},
-		thenCall:   "overseaspo",
-		willReturn: true,
-		willExit:   false,
+		Tasks:      []string{"dodiscount", "yearendsale"},
+		Properties: []Property{{"discount", "7"}, {"shipby", "fedex"}},
+		ThenCall:   "overseaspo",
+		WillReturn: true,
+		WillExit:   false,
 	}
 
 	want := ActionSet{

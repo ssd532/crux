@@ -1,3 +1,5 @@
+/* Sets up and runs all tests for doMatch() */
+
 package main
 
 import (
@@ -17,7 +19,7 @@ type doMatchTest struct {
 func TestDoMatch(t *testing.T) {
 	tests := []doMatchTest{}
 
-	// BRE tests
+	// Adds BRE-tests to the "tests" slice
 	testBasic(&tests)
 	testExit(&tests)
 	testReturn(&tests)
@@ -25,11 +27,12 @@ func TestDoMatch(t *testing.T) {
 	testPurchases(&tests)
 	testOrders(&tests)
 
-	// WFE tests
+	// Adds WFE-tests to the "tests" slice
 	testUCCCreation(&tests)
 	testPrepareAOF(&tests)
 	testValidateAOF(&tests)
 
+	// Run all tests
 	fmt.Printf("Running %v doMatch() tests\n", len(tests))
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -40,6 +43,6 @@ func TestDoMatch(t *testing.T) {
 		})
 	}
 
-	// Test for cyclical rulesets
+	// Test for cyclical rulesets that could lead to an infinite loop
 	testCycleError(t)
 }

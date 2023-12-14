@@ -1,3 +1,9 @@
+/*
+This file contains doMatch() and a helper function called by doMatch().
+It also contains ruleSets, a map in which we are currently storing all
+rulesets for the purpose of testing doMatch().
+*/
+
 package main
 
 import (
@@ -5,76 +11,25 @@ import (
 	"fmt"
 )
 
-const (
-	timeLayout = "2006-01-02T15:04:05Z"
-)
-
-type Entity struct {
-	class string
-	attrs []Attr
-}
-
-type Attr struct {
-	name string
-	val  string
-}
-
-type ActionSet struct {
-	tasks      []string
-	properties []Property
-}
-
-type Property struct {
-	name string
-	val  string
-}
-
 var ruleSets = make(map[string]RuleSet)
 
-type RuleSet struct {
-	ver     int
-	class   string
-	setName string
-	rules   []Rule
-}
-
-type Rule struct {
-	rulePattern []RulePatternTerm
-	ruleActions RuleActions
-}
-
-type RulePatternTerm struct {
-	attrName string
-	op       string
-	attrVal  any
-}
-
-type RuleActions struct {
-	tasks      []string
-	properties []Property
-	thenCall   string
-	elseCall   string
-	willReturn bool
-	willExit   bool
-}
-
 func doMatch(entity Entity, ruleSet RuleSet, actionSet ActionSet, seenRuleSets map[string]bool) (ActionSet, bool, error) {
-	if seenRuleSets[ruleSet.setName] {
+	if seenRuleSets[ruleSet.SetName] {
 		return ActionSet{}, false, errors.New("ruleset has already been traversed")
 	}
-	seenRuleSets[ruleSet.setName] = true
-	for _, rule := range ruleSet.rules {
+	seenRuleSets[ruleSet.SetName] = true
+	for _, rule := range ruleSet.Rules {
 		willExit := false
-		matched, err := matchPattern(entity, rule.rulePattern, actionSet)
+		matched, err := matchPattern(entity, rule.RulePattern, actionSet)
 		if err != nil {
 			return ActionSet{}, false, err
 		}
 		if matched {
-			actionSet = collectActions(actionSet, rule.ruleActions)
-			if len(rule.ruleActions.thenCall) > 0 {
-				setToCall := ruleSets[rule.ruleActions.thenCall]
-				if setToCall.class != entity.class {
-					return inconsistentRuleSet(setToCall.setName, ruleSet.setName)
+			actionSet = collectActions(actionSet, rule.RuleActions)
+			if len(rule.RuleActions.ThenCall) > 0 {
+				setToCall := ruleSets[rule.RuleActions.ThenCall]
+				if setToCall.Class != entity.class {
+					return inconsistentRuleSet(setToCall.SetName, ruleSet.SetName)
 				}
 				var err error
 				actionSet, willExit, err = doMatch(entity, setToCall, actionSet, seenRuleSets)
@@ -82,17 +37,17 @@ func doMatch(entity Entity, ruleSet RuleSet, actionSet ActionSet, seenRuleSets m
 					return ActionSet{}, false, err
 				}
 			}
-			if willExit || rule.ruleActions.willExit {
+			if willExit || rule.RuleActions.WillExit {
 				return actionSet, true, nil
 			}
-			if rule.ruleActions.willReturn {
-				delete(seenRuleSets, ruleSet.setName)
+			if rule.RuleActions.WillReturn {
+				delete(seenRuleSets, ruleSet.SetName)
 				return actionSet, false, nil
 			}
-		} else if len(rule.ruleActions.elseCall) > 0 {
-			setToCall := ruleSets[rule.ruleActions.elseCall]
-			if setToCall.class != entity.class {
-				return inconsistentRuleSet(setToCall.setName, ruleSet.setName)
+		} else if len(rule.RuleActions.ElseCall) > 0 {
+			setToCall := ruleSets[rule.RuleActions.ElseCall]
+			if setToCall.Class != entity.class {
+				return inconsistentRuleSet(setToCall.SetName, ruleSet.SetName)
 			}
 			var err error
 			actionSet, willExit, err = doMatch(entity, setToCall, actionSet, seenRuleSets)
@@ -103,7 +58,7 @@ func doMatch(entity Entity, ruleSet RuleSet, actionSet ActionSet, seenRuleSets m
 			}
 		}
 	}
-	delete(seenRuleSets, ruleSet.setName)
+	delete(seenRuleSets, ruleSet.SetName)
 	return actionSet, false, nil
 }
 

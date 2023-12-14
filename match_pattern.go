@@ -1,3 +1,5 @@
+/* This file contains matchPattern(), and helper functions called by matchPattern() */
+
 package main
 
 import (
@@ -15,8 +17,7 @@ const (
 	typeEnum  = "enum"
 	typeTS    = "ts"
 
-	trueStr  = "true"
-	falseStr = "false"
+	timeLayout = "2006-01-02T15:04:05Z"
 
 	opEQ = "eq"
 	opNE = "ne"
@@ -24,6 +25,9 @@ const (
 	opLE = "le"
 	opGT = "gt"
 	opGE = "ge"
+
+	trueStr  = "true"
+	falseStr = "false"
 )
 
 func matchPattern(entity Entity, rulePattern []RulePatternTerm, actionSet ActionSet) (bool, error) {
@@ -31,7 +35,7 @@ func matchPattern(entity Entity, rulePattern []RulePatternTerm, actionSet Action
 		valType := ""
 		entityAttrVal := ""
 		for _, entityAttr := range entity.attrs {
-			if entityAttr.name == term.attrName {
+			if entityAttr.name == term.AttrName {
 				entityAttrVal = entityAttr.val
 				valType = getTypeFromSchema(entity.class, entityAttr.name)
 			}
@@ -40,7 +44,7 @@ func matchPattern(entity Entity, rulePattern []RulePatternTerm, actionSet Action
 			// Check whether the attribute name in the pattern term matches any of the tasks in
 			// the action-set
 			for _, task := range actionSet.tasks {
-				if task == term.attrName {
+				if task == term.AttrName {
 					entityAttrVal = trueStr
 					valType = typeBool
 				}
@@ -50,7 +54,7 @@ func matchPattern(entity Entity, rulePattern []RulePatternTerm, actionSet Action
 			entityAttrVal = falseStr
 			valType = typeBool
 		}
-		matched, err := makeComparison(entityAttrVal, term.attrVal, valType, term.op)
+		matched, err := makeComparison(entityAttrVal, term.AttrVal, valType, term.Op)
 		if err != nil {
 			return false, fmt.Errorf("error making comparison %w", err)
 		}
@@ -74,6 +78,8 @@ func getTypeFromSchema(class string, attrName string) string {
 	return ""
 }
 
+// Returns whether or not the comparison represented by {entityAttrVal, op, termAttrVal} is true
+// For example, {7, gt (greater than), 5} is true but {3, gt, 5} is false
 func makeComparison(entityAttrVal string, termAttrVal any, valType string, op string) (bool, error) {
 	entityAttrValConv, err := convertEntityAttrVal(entityAttrVal, valType)
 	if err != nil {
@@ -111,6 +117,7 @@ func makeComparison(entityAttrVal string, termAttrVal any, valType string, op st
 	return match, nil
 }
 
+// Converts the string entityAttrVal to its schema-provided type
 func convertEntityAttrVal(entityAttrVal string, valType string) (any, error) {
 	var entityAttrValConv any
 	var err error

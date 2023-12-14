@@ -1,3 +1,5 @@
+/* This file contains the collectActions() function */
+
 package main
 
 func collectActions(actionSet ActionSet, ruleActions RuleActions) ActionSet {
@@ -5,7 +7,7 @@ func collectActions(actionSet ActionSet, ruleActions RuleActions) ActionSet {
 
 	// Union-set of tasks
 	newActionSet.tasks = append(newActionSet.tasks, actionSet.tasks...)
-	for _, newTask := range ruleActions.tasks {
+	for _, newTask := range ruleActions.Tasks {
 		found := false
 		for _, task := range newActionSet.tasks {
 			if newTask == task {
@@ -20,11 +22,11 @@ func collectActions(actionSet ActionSet, ruleActions RuleActions) ActionSet {
 
 	// Perform "union-set" of properties, overwriting previous property values if needed
 	newActionSet.properties = append(newActionSet.properties, actionSet.properties...)
-	for _, newProperty := range ruleActions.properties {
+	for _, newProperty := range ruleActions.Properties {
 		found := false
 		for i, property := range newActionSet.properties {
-			if property.name == newProperty.name {
-				newActionSet.properties[i].val = newProperty.val
+			if property.Name == newProperty.Name {
+				newActionSet.properties[i].Val = newProperty.Val
 				found = true
 				break
 			}

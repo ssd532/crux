@@ -1,5 +1,6 @@
 /*
-This file contains WFE tests for doMatch()
+This file contains the functions that are WFE tests for doMatch(). These functions are called
+inside TestDoMatch() in do_match_test.go.
 
 Some of the definitions of rulesets below deliberately use a lot of whitespace to keep the code consistent
 and to make it easier to understand, add to, and edit these tests
@@ -11,13 +12,13 @@ const (
 	uccCreationClass = "ucccreation"
 	prepareAOFClass  = "prepareaof"
 	validateAOFClass = "validateaof"
-	complexWFClass   = "complexwf"
 )
 
 func testUCCCreation(tests *[]doMatchTest) {
 	setupUCCCreationSchema()
 	setupUCCCreationRuleSet()
 
+	// Each test below involves calling doMatch() with a different entity
 	testUCCStart(tests)
 	testUCCGetCustDetailsDemat(tests)
 	testUCCGetCustDetailsDematFail(tests)
@@ -51,8 +52,8 @@ func setupUCCCreationRuleSet() {
 			{step, opEQ, start},
 		},
 		RuleActions{
-			tasks:      []string{"getcustdetails"},
-			properties: []Property{{nextStep, "getcustdetails"}},
+			Tasks:      []string{"getcustdetails"},
+			Properties: []Property{{nextStep, "getcustdetails"}},
 		},
 	}
 	rule2 := Rule{
@@ -62,8 +63,8 @@ func setupUCCCreationRuleSet() {
 			{"mode", opEQ, "physical"},
 		},
 		RuleActions{
-			tasks:      []string{"aof", "kycvalid", "nomauth", "bankaccvalid"},
-			properties: []Property{{nextStep, "aof"}},
+			Tasks:      []string{"aof", "kycvalid", "nomauth", "bankaccvalid"},
+			Properties: []Property{{nextStep, "aof"}},
 		},
 	}
 	rule3 := Rule{
@@ -73,8 +74,8 @@ func setupUCCCreationRuleSet() {
 			{"mode", opEQ, "demat"},
 		},
 		RuleActions{
-			tasks:      []string{"aof", "kycvalid", "nomauth", "dpandbankaccvalid"},
-			properties: []Property{{nextStep, "aof"}},
+			Tasks:      []string{"aof", "kycvalid", "nomauth", "dpandbankaccvalid"},
+			Properties: []Property{{nextStep, "aof"}},
 		},
 	}
 	rule4 := Rule{
@@ -83,8 +84,8 @@ func setupUCCCreationRuleSet() {
 			{stepFailed, opEQ, true},
 		},
 		RuleActions{
-			tasks:      []string{},
-			properties: []Property{{done, trueStr}},
+			Tasks:      []string{},
+			Properties: []Property{{done, trueStr}},
 		},
 	}
 	rule5 := Rule{
@@ -93,8 +94,8 @@ func setupUCCCreationRuleSet() {
 			{stepFailed, opEQ, false},
 		},
 		RuleActions{
-			tasks:      []string{"sendauthlinktoclient"},
-			properties: []Property{{nextStep, "sendauthlinktoclient"}},
+			Tasks:      []string{"sendauthlinktoclient"},
+			Properties: []Property{{nextStep, "sendauthlinktoclient"}},
 		},
 	}
 	rule6 := Rule{
@@ -103,7 +104,7 @@ func setupUCCCreationRuleSet() {
 			{stepFailed, opEQ, true},
 		},
 		RuleActions{
-			properties: []Property{{done, trueStr}},
+			Properties: []Property{{done, trueStr}},
 		},
 	}
 	rule7 := Rule{
@@ -111,7 +112,7 @@ func setupUCCCreationRuleSet() {
 			{step, opEQ, "sendauthlinktoclient"},
 		},
 		RuleActions{
-			properties: []Property{{done, trueStr}},
+			Properties: []Property{{done, trueStr}},
 		},
 	}
 	ruleSets["ucccreation"] = RuleSet{1, uccCreationClass, "ucccreation",
@@ -241,6 +242,7 @@ func testPrepareAOF(tests *[]doMatchTest) {
 
 	setupRuleSetForPrepareAOF()
 
+	// Each test below involves calling doMatch() with a different entity
 	testDownloadAOF(tests)
 	testDownloadAOFFail(tests)
 	testPrintAOF(tests)
@@ -349,8 +351,8 @@ func setupRuleSetForPrepareAOF() {
 			{step, opEQ, start},
 		},
 		RuleActions{
-			tasks:      []string{"downloadform"},
-			properties: []Property{{nextStep, "downloadform"}},
+			Tasks:      []string{"downloadform"},
+			Properties: []Property{{nextStep, "downloadform"}},
 		},
 	}
 	rule2 := Rule{
@@ -359,8 +361,8 @@ func setupRuleSetForPrepareAOF() {
 			{stepFailed, opEQ, false},
 		},
 		RuleActions{
-			tasks:      []string{"printprefilledform"},
-			properties: []Property{{nextStep, "printprefilledform"}},
+			Tasks:      []string{"printprefilledform"},
+			Properties: []Property{{nextStep, "printprefilledform"}},
 		},
 	}
 	rule2F := Rule{
@@ -369,7 +371,7 @@ func setupRuleSetForPrepareAOF() {
 			{stepFailed, opEQ, true},
 		},
 		RuleActions{
-			properties: []Property{{done, trueStr}},
+			Properties: []Property{{done, trueStr}},
 		},
 	}
 	rule3 := Rule{
@@ -378,8 +380,8 @@ func setupRuleSetForPrepareAOF() {
 			{stepFailed, opEQ, false},
 		},
 		RuleActions{
-			tasks:      []string{"signform"},
-			properties: []Property{{nextStep, "signform"}},
+			Tasks:      []string{"signform"},
+			Properties: []Property{{nextStep, "signform"}},
 		},
 	}
 	rule3F := Rule{
@@ -388,7 +390,7 @@ func setupRuleSetForPrepareAOF() {
 			{stepFailed, opEQ, true},
 		},
 		RuleActions{
-			properties: []Property{{done, trueStr}},
+			Properties: []Property{{done, trueStr}},
 		},
 	}
 	rule4 := Rule{
@@ -397,8 +399,8 @@ func setupRuleSetForPrepareAOF() {
 			{stepFailed, opEQ, false},
 		},
 		RuleActions{
-			tasks:      []string{"receivesignedform"},
-			properties: []Property{{nextStep, "receivesignedform"}},
+			Tasks:      []string{"receivesignedform"},
+			Properties: []Property{{nextStep, "receivesignedform"}},
 		},
 	}
 	rule4F := Rule{
@@ -407,7 +409,7 @@ func setupRuleSetForPrepareAOF() {
 			{stepFailed, opEQ, true},
 		},
 		RuleActions{
-			properties: []Property{{done, trueStr}},
+			Properties: []Property{{done, trueStr}},
 		},
 	}
 	rule5 := Rule{
@@ -416,8 +418,8 @@ func setupRuleSetForPrepareAOF() {
 			{stepFailed, opEQ, false},
 		},
 		RuleActions{
-			tasks:      []string{"uploadsignedform"},
-			properties: []Property{{nextStep, "uploadsignedform"}},
+			Tasks:      []string{"uploadsignedform"},
+			Properties: []Property{{nextStep, "uploadsignedform"}},
 		},
 	}
 	rule5F := Rule{
@@ -426,7 +428,7 @@ func setupRuleSetForPrepareAOF() {
 			{stepFailed, opEQ, true},
 		},
 		RuleActions{
-			properties: []Property{{done, trueStr}},
+			Properties: []Property{{done, trueStr}},
 		},
 	}
 	rule6 := Rule{
@@ -434,8 +436,8 @@ func setupRuleSetForPrepareAOF() {
 			{step, opEQ, "uploadsignedform"},
 		},
 		RuleActions{
-			tasks:      []string{},
-			properties: []Property{{done, trueStr}},
+			Tasks:      []string{},
+			Properties: []Property{{done, trueStr}},
 		},
 	}
 	ruleSets["prepareaof"] = RuleSet{1, prepareAOFClass, "prepareaof",
@@ -455,6 +457,7 @@ func testValidateAOF(tests *[]doMatchTest) {
 
 	setupRuleSetForValidateAOF()
 
+	// Each test below involves calling doMatch() with a different entity
 	testValidateExistingAOF(tests)
 	testValidateAOFStart(tests)
 	testSendAOFToRTAFail(tests)
@@ -529,7 +532,7 @@ func setupRuleSetForValidateAOF() {
 			{"aofexists", opEQ, true},
 		},
 		RuleActions{
-			properties: []Property{{done, trueStr}},
+			Properties: []Property{{done, trueStr}},
 		},
 	}
 	rule2 := Rule{
@@ -538,8 +541,8 @@ func setupRuleSetForValidateAOF() {
 			{"aofexists", opEQ, false},
 		},
 		RuleActions{
-			tasks:      []string{"sendaoftorta"},
-			properties: []Property{{nextStep, "sendaoftorta"}},
+			Tasks:      []string{"sendaoftorta"},
+			Properties: []Property{{nextStep, "sendaoftorta"}},
 		},
 	}
 	rule3 := Rule{
@@ -549,8 +552,8 @@ func setupRuleSetForValidateAOF() {
 			{"aofexists", opEQ, false},
 		},
 		RuleActions{
-			tasks:      []string{"getresponsefromrta"},
-			properties: []Property{{nextStep, "getresponsefromrta"}},
+			Tasks:      []string{"getresponsefromrta"},
+			Properties: []Property{{nextStep, "getresponsefromrta"}},
 		},
 	}
 	rule3F := Rule{
@@ -560,8 +563,8 @@ func setupRuleSetForValidateAOF() {
 			{"aofexists", opEQ, false},
 		},
 		RuleActions{
-			tasks:      []string{},
-			properties: []Property{{done, trueStr}},
+			Tasks:      []string{},
+			Properties: []Property{{done, trueStr}},
 		},
 	}
 	rule4 := Rule{
@@ -570,7 +573,7 @@ func setupRuleSetForValidateAOF() {
 			{"aofexists", opEQ, false},
 		},
 		RuleActions{
-			properties: []Property{{done, trueStr}},
+			Properties: []Property{{done, trueStr}},
 		},
 	}
 	ruleSets["validateaof"] = RuleSet{1, validateAOFClass, "validateaof",

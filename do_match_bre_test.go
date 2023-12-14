@@ -1,5 +1,6 @@
 /*
-This file contains BRE tests for doMatch()
+This file contains the functions that are BRE tests for doMatch(). These functions are called
+inside TestDoMatch() in do_match_test.go.
 
 Some of the definitions of rulesets below deliberately use a lot of whitespace to keep the code consistent
 and to make it easier to understand, add to, and edit these tests
@@ -10,6 +11,7 @@ package main
 import "testing"
 
 const (
+	// The "main" ruleset that may contain "thenCall"s/"elseCall"s to other rulesets
 	mainRS = "main"
 
 	inventoryItemClass = "inventoryitem"
@@ -32,8 +34,8 @@ func testBasic(tests *[]doMatchTest) {
 		[]Rule{{
 			[]RulePatternTerm{{"cat", opEQ, "textbook"}},
 			RuleActions{
-				tasks:      []string{"yearendsale", "summersale"},
-				properties: []Property{{"cashback", "10"}, {"discount", "9"}},
+				Tasks:      []string{"yearendsale", "summersale"},
+				Properties: []Property{{"cashback", "10"}, {"discount", "9"}},
 			},
 		}},
 	}
@@ -48,20 +50,20 @@ func testBasic(tests *[]doMatchTest) {
 
 func testExit(tests *[]doMatchTest) {
 	rA1 := RuleActions{
-		tasks:      []string{"springsale"},
-		properties: []Property{{"cashback", "15"}},
+		Tasks:      []string{"springsale"},
+		Properties: []Property{{"cashback", "15"}},
 	}
 	rA2 := RuleActions{
-		tasks:      []string{"yearendsale", "summersale"},
-		properties: []Property{{"discount", "10"}, {"freegift", "mug"}},
+		Tasks:      []string{"yearendsale", "summersale"},
+		Properties: []Property{{"discount", "10"}, {"freegift", "mug"}},
 	}
 	rA3 := RuleActions{
-		tasks:      []string{"wintersale"},
-		properties: []Property{{"discount", "15"}},
-		willExit:   true,
+		Tasks:      []string{"wintersale"},
+		Properties: []Property{{"discount", "15"}},
+		WillExit:   true,
 	}
 	rA4 := RuleActions{
-		tasks: []string{"autumnsale"},
+		Tasks: []string{"autumnsale"},
 	}
 	ruleSet := RuleSet{1, inventoryItemClass, mainRS, []Rule{
 		{[]RulePatternTerm{{"cat", opEQ, "refbook"}}, rA1},                           // no match
@@ -78,16 +80,16 @@ func testExit(tests *[]doMatchTest) {
 
 func testReturn(tests *[]doMatchTest) {
 	rA1 := RuleActions{
-		tasks:      []string{"yearendsale", "summersale"},
-		properties: []Property{{"discount", "10"}, {"freegift", "mug"}},
+		Tasks:      []string{"yearendsale", "summersale"},
+		Properties: []Property{{"discount", "10"}, {"freegift", "mug"}},
 	}
 	rA2 := RuleActions{
-		tasks:      []string{"springsale"},
-		properties: []Property{{"discount", "15"}},
-		willReturn: true,
+		Tasks:      []string{"springsale"},
+		Properties: []Property{{"discount", "15"}},
+		WillReturn: true,
 	}
 	rA3 := RuleActions{
-		tasks: []string{"autumnsale"},
+		Tasks: []string{"autumnsale"},
 	}
 	ruleSet := RuleSet{1, inventoryItemClass, mainRS, []Rule{
 		{[]RulePatternTerm{{"ageinstock", opLT, 7}, {"cat", opEQ, "textbook"}}, rA1}, // match
@@ -119,6 +121,7 @@ func testTransactions(tests *[]doMatchTest) {
 	setupRuleSetMemberDisc()
 	setupRuleSetNonMemberDisc()
 
+	// Each test below involves calling doMatch() with a different entity
 	testWinterDiscJacket60(tests)
 	testWinterDiscJacket40(tests)
 	testWinterDiscKettle110Cash(tests)
@@ -140,8 +143,8 @@ func setupRuleSetMainForTransaction() {
 			{"inwintersale", opEQ, true},
 		},
 		RuleActions{
-			thenCall: "winterdisc",
-			elseCall: "regulardisc",
+			ThenCall: "winterdisc",
+			ElseCall: "regulardisc",
 		},
 	}
 	rule2 := Rule{
@@ -150,7 +153,7 @@ func setupRuleSetMainForTransaction() {
 			{"price", opGT, 10},
 		},
 		RuleActions{
-			tasks: []string{"freepen"},
+			Tasks: []string{"freepen"},
 		},
 	}
 	rule3 := Rule{
@@ -159,14 +162,14 @@ func setupRuleSetMainForTransaction() {
 			{"price", opGT, 10},
 		},
 		RuleActions{
-			tasks: []string{"freemug"},
+			Tasks: []string{"freemug"},
 		},
 	}
 	rule4 := Rule{
 		[]RulePatternTerm{
 			{"freehat", opEQ, true},
 		},
-		RuleActions{tasks: []string{"freebag"}},
+		RuleActions{Tasks: []string{"freebag"}},
 	}
 	ruleSets[mainRS] = RuleSet{1, transactionClass, mainRS,
 		[]Rule{rule1, rule2, rule3, rule4},
@@ -180,9 +183,9 @@ func setupRuleSetWinterDisc() {
 			{"price", opGT, 50},
 		},
 		RuleActions{
-			tasks:      []string{"freehat"},
-			properties: []Property{{"discount", "50"}},
-			willReturn: true,
+			Tasks:      []string{"freehat"},
+			Properties: []Property{{"discount", "50"}},
+			WillReturn: true,
 		},
 	}
 	rule2 := Rule{
@@ -190,7 +193,7 @@ func setupRuleSetWinterDisc() {
 			{"price", opLT, 100},
 		},
 		RuleActions{
-			properties: []Property{{"discount", "40"}, {"pointsmult", "2"}},
+			Properties: []Property{{"discount", "40"}, {"pointsmult", "2"}},
 		},
 	}
 	rule3 := Rule{
@@ -198,7 +201,7 @@ func setupRuleSetWinterDisc() {
 			{"price", opGE, 100},
 		},
 		RuleActions{
-			properties: []Property{{"discount", "45"}, {"pointsmult", "3"}},
+			Properties: []Property{{"discount", "45"}, {"pointsmult", "3"}},
 		},
 	}
 	ruleSets["winterdisc"] = RuleSet{1, transactionClass, "winterdisc",
@@ -212,8 +215,8 @@ func setupRuleSetRegularDisc() {
 			{"ismember", opEQ, true},
 		},
 		RuleActions{
-			thenCall: "memberdisc",
-			elseCall: "nonmemberdisc",
+			ThenCall: "memberdisc",
+			ElseCall: "nonmemberdisc",
 		},
 	}
 	ruleSets["regulardisc"] = RuleSet{1, transactionClass, "regulardisc",
@@ -228,8 +231,8 @@ func setupRuleSetMemberDisc() {
 			{"price", opGT, 50},
 		},
 		RuleActions{
-			properties: []Property{{"discount", "35"}, {"pointsmult", "2"}},
-			willExit:   true,
+			Properties: []Property{{"discount", "35"}, {"pointsmult", "2"}},
+			WillExit:   true,
 		},
 	}
 	rule2 := Rule{
@@ -237,7 +240,7 @@ func setupRuleSetMemberDisc() {
 			{"price", opLT, 100},
 		},
 		RuleActions{
-			properties: []Property{{"discount", "20"}},
+			Properties: []Property{{"discount", "20"}},
 		},
 	}
 	rule3 := Rule{
@@ -245,7 +248,7 @@ func setupRuleSetMemberDisc() {
 			{"price", opGE, 100},
 		},
 		RuleActions{
-			properties: []Property{{"discount", "25"}},
+			Properties: []Property{{"discount", "25"}},
 		},
 	}
 	ruleSets["memberdisc"] = RuleSet{1, transactionClass, "memberdisc",
@@ -259,7 +262,7 @@ func setupRuleSetNonMemberDisc() {
 			{"price", opLT, 50},
 		},
 		RuleActions{
-			properties: []Property{{"discount", "5"}},
+			Properties: []Property{{"discount", "5"}},
 		},
 	}
 	rule2 := Rule{
@@ -267,7 +270,7 @@ func setupRuleSetNonMemberDisc() {
 			{"price", opGE, 50},
 		},
 		RuleActions{
-			properties: []Property{{"discount", "10"}},
+			Properties: []Property{{"discount", "10"}},
 		},
 	}
 	rule3 := Rule{
@@ -275,7 +278,7 @@ func setupRuleSetNonMemberDisc() {
 			{"price", opGE, 100},
 		},
 		RuleActions{
-			properties: []Property{{"discount", "15"}},
+			Properties: []Property{{"discount", "15"}},
 		},
 	}
 	ruleSets["nonmemberdisc"] = RuleSet{1, transactionClass, "nonmemberdisc",
@@ -585,22 +588,20 @@ func testPurchases(tests *[]doMatchTest) {
 	setupPurchaseRuleSchema()
 	setupRuleSetForPurchases()
 
+	// Each test below involves calling doMatch() with a different entity
 	testJacket35(tests)
 	testJacket55ForMember(tests)
 	testJacket55ForNonMember(tests)
 	testJacket75ForMember(tests)
 	testJacket75ForNonMember(tests)
-
 	testLamp35(tests)
 	testLamp55(tests)
 	testLamp75ForMember(tests)
 	testLamp75ForNonMember(tests)
-
 	testKettle35(tests)
 	testKettle55(tests)
 	testKettle75ForMember(tests)
 	testKettle75ForNonMember(tests)
-
 	testOven35(tests)
 	testOven55(tests)
 }
@@ -937,8 +938,8 @@ func setupRuleSetForPurchases() {
 			{"price", opGT, 30.0},
 		},
 		RuleActions{
-			tasks:      []string{"freepen", "freebottle", "freepencil"},
-			properties: []Property{{"discount", "5"}},
+			Tasks:      []string{"freepen", "freebottle", "freepencil"},
+			Properties: []Property{{"discount", "5"}},
 		},
 	}
 	rule2 := Rule{
@@ -947,7 +948,7 @@ func setupRuleSetForPurchases() {
 			{"price", opGT, 50.0},
 		},
 		RuleActions{
-			properties: []Property{{"discount", "10"}},
+			Properties: []Property{{"discount", "10"}},
 		},
 	}
 	rule3 := Rule{
@@ -957,7 +958,7 @@ func setupRuleSetForPurchases() {
 			{"ismember", opEQ, true},
 		},
 		RuleActions{
-			properties: []Property{{"discount", "15"}, {"pointsmult", "2"}},
+			Properties: []Property{{"discount", "15"}, {"pointsmult", "2"}},
 		},
 	}
 	rule4 := Rule{
@@ -966,8 +967,8 @@ func setupRuleSetForPurchases() {
 			{"price", opGT, 30.0},
 		},
 		RuleActions{
-			tasks:      []string{"freemug", "freejar", "freeplant"},
-			properties: []Property{{"discount", "20"}},
+			Tasks:      []string{"freemug", "freejar", "freeplant"},
+			Properties: []Property{{"discount", "20"}},
 		},
 	}
 	rule5 := Rule{
@@ -976,7 +977,7 @@ func setupRuleSetForPurchases() {
 			{"price", opGT, 50.0},
 		},
 		RuleActions{
-			properties: []Property{{"discount", "25"}},
+			Properties: []Property{{"discount", "25"}},
 		},
 	}
 	rule6 := Rule{
@@ -986,8 +987,8 @@ func setupRuleSetForPurchases() {
 			{"ismember", opEQ, true},
 		},
 		RuleActions{
-			properties: []Property{{"discount", "30"}, {"pointsmult", "3"}},
-			willExit:   true,
+			Properties: []Property{{"discount", "30"}, {"pointsmult", "3"}},
+			WillExit:   true,
 		},
 	}
 	rule7 := Rule{
@@ -996,7 +997,7 @@ func setupRuleSetForPurchases() {
 			{"price", opGT, 30.0},
 		},
 		RuleActions{
-			properties: []Property{{"discount", "35"}},
+			Properties: []Property{{"discount", "35"}},
 		},
 	}
 	rule8 := Rule{
@@ -1005,7 +1006,7 @@ func setupRuleSetForPurchases() {
 			{"price", opGT, 50.0},
 		},
 		RuleActions{
-			properties: []Property{{"discount", "40"}},
+			Properties: []Property{{"discount", "40"}},
 		},
 	}
 	rule9 := Rule{
@@ -1015,8 +1016,8 @@ func setupRuleSetForPurchases() {
 			{"ismember", opEQ, true},
 		},
 		RuleActions{
-			properties: []Property{{"discount", "45"}, {"pointsmult", "4"}},
-			willReturn: true,
+			Properties: []Property{{"discount", "45"}, {"pointsmult", "4"}},
+			WillReturn: true,
 		},
 	}
 	rule10 := Rule{
@@ -1024,7 +1025,7 @@ func setupRuleSetForPurchases() {
 			{"freemug", opEQ, true},
 		},
 		RuleActions{
-			tasks: []string{"freebag"},
+			Tasks: []string{"freebag"},
 		},
 	}
 	rule11 := Rule{
@@ -1032,7 +1033,7 @@ func setupRuleSetForPurchases() {
 			{"price", opGT, 50.0},
 		},
 		RuleActions{
-			tasks: []string{"freenotebook"},
+			Tasks: []string{"freenotebook"},
 		},
 	}
 	ruleSets[mainRS] = RuleSet{1, purchaseClass, mainRS,
@@ -1060,6 +1061,7 @@ func testOrders(tests *[]doMatchTest) {
 	setupRuleSetPurchaseOrSIPForOrder()
 	setupRuleSetOtherOrderTypesForOrder()
 
+	// Each test below involves calling doMatch() with a different entity
 	testSIPOrder(tests)
 	testSwitchDematOrder(tests)
 	testSwitchDematExtHours(tests)
@@ -1075,7 +1077,7 @@ func setupRuleSetMainForOrder() {
 			{"ordertype", opEQ, "purchase"},
 		},
 		RuleActions{
-			thenCall: "purchaseorsip",
+			ThenCall: "purchaseorsip",
 		},
 	}
 	rule2 := Rule{
@@ -1083,7 +1085,7 @@ func setupRuleSetMainForOrder() {
 			{"ordertype", opEQ, "sip"},
 		},
 		RuleActions{
-			thenCall: "purchaseorsip",
+			ThenCall: "purchaseorsip",
 		},
 	}
 	rule3 := Rule{
@@ -1092,8 +1094,8 @@ func setupRuleSetMainForOrder() {
 			{"ordertype", opNE, "sip"},
 		},
 		RuleActions{
-			properties: []Property{{"amfiordercutoff", "1500"}, {"bseordercutoff", "1500"}},
-			thenCall:   "otherordertypes",
+			Properties: []Property{{"amfiordercutoff", "1500"}, {"bseordercutoff", "1500"}},
+			ThenCall:   "otherordertypes",
 		},
 	}
 	ruleSets[mainRS] = RuleSet{1, orderClass, mainRS,
@@ -1108,15 +1110,15 @@ func setupRuleSetPurchaseOrSIPForOrder() {
 			{"overnightscheme", opEQ, false},
 		},
 		RuleActions{
-			properties: []Property{{"amfiordercutoff", "1500"}, {"bseordercutoff", "1430"},
+			Properties: []Property{{"amfiordercutoff", "1500"}, {"bseordercutoff", "1430"},
 				{"fundscutoff", "1430"}},
-			willReturn: true,
+			WillReturn: true,
 		},
 	}
 	rule2 := Rule{
 		[]RulePatternTerm{},
 		RuleActions{
-			properties: []Property{{"amfiordercutoff", "1330"}, {"bseordercutoff", "1300"},
+			Properties: []Property{{"amfiordercutoff", "1330"}, {"bseordercutoff", "1300"},
 				{"fundscutoff", "1230"}},
 		},
 	}
@@ -1131,7 +1133,7 @@ func setupRuleSetOtherOrderTypesForOrder() {
 			{"mode", opEQ, "physical"},
 		},
 		RuleActions{
-			tasks: []string{"unitstoamc", "unitstorta"},
+			Tasks: []string{"unitstoamc", "unitstorta"},
 		},
 	}
 	rule2 := Rule{
@@ -1140,7 +1142,7 @@ func setupRuleSetOtherOrderTypesForOrder() {
 			{"extendedhours", opEQ, false},
 		},
 		RuleActions{
-			properties: []Property{{"unitscutoff", "1630"}},
+			Properties: []Property{{"unitscutoff", "1630"}},
 		},
 	}
 	rule3 := Rule{
@@ -1149,7 +1151,7 @@ func setupRuleSetOtherOrderTypesForOrder() {
 			{"extendedhours", opEQ, true},
 		},
 		RuleActions{
-			properties: []Property{{"unitscutoff", "1730"}},
+			Properties: []Property{{"unitscutoff", "1730"}},
 		},
 	}
 	ruleSets["otherordertypes"] = RuleSet{1, orderClass, "otherordertypes",
@@ -1328,39 +1330,39 @@ func testCycleError(t *testing.T) {
 }
 
 func setupRuleSetsForCycleError() {
-	// main ruleset
+	// main ruleset that contains a ThenCall to ruleset "second"
 	rule1 := Rule{
 		[]RulePatternTerm{
 			{"cat", opEQ, "textbook"},
 		},
 		RuleActions{
-			thenCall: "second",
+			ThenCall: "second",
 		},
 	}
 	ruleSets[mainRS] = RuleSet{1, inventoryItemClass, mainRS,
 		[]Rule{rule1},
 	}
 
-	// second ruleset
+	// "second" ruleset that contains a ThenCall to ruleset "third"
 	rule1 = Rule{
 		[]RulePatternTerm{
 			{"cat", opEQ, "textbook"},
 		},
 		RuleActions{
-			thenCall: "third",
+			ThenCall: "third",
 		},
 	}
 	ruleSets["second"] = RuleSet{1, inventoryItemClass, "second",
 		[]Rule{rule1},
 	}
 
-	// third ruleset
+	// "third" ruleset that contains a ThenCall back to ruleset "second"
 	rule1 = Rule{
 		[]RulePatternTerm{
 			{"cat", opEQ, "textbook"},
 		},
 		RuleActions{
-			tasks: []string{"testtask"},
+			Tasks: []string{"testtask"},
 		},
 	}
 	rule2 := Rule{
@@ -1368,7 +1370,7 @@ func setupRuleSetsForCycleError() {
 			{"cat", opEQ, "textbook"},
 		},
 		RuleActions{
-			thenCall: "second",
+			ThenCall: "second",
 		},
 	}
 	ruleSets["third"] = RuleSet{1, inventoryItemClass, "third",
